@@ -34,5 +34,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 		room.DELETE("/:id", s.roomHandler.Delete)
 	}
 
+	food := r.Group("/food")
+	{
+		food.POST("", s.foodHandler.Create)
+		food.GET("", s.foodHandler.GetAll)
+		food.GET("/:id", s.foodHandler.GetByID)
+		food.PATCH("/:id", s.foodHandler.Update)
+		food.DELETE("/:id", s.foodHandler.Delete)
+	}
+
 	return r
 }
