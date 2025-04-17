@@ -45,7 +45,7 @@ func (r *roomRepo) FindAll() ([]model.Room, error) {
 
 func (r *roomRepo) FindByID(id uint) (*model.Room, error) {
 	var room model.Room
-	tx := r.db.Gorm.Preload("RoomType").Find(&room, id)
+	tx := r.db.Gorm.Preload("RoomType").First(&room, id)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
