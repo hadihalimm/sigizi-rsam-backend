@@ -70,5 +70,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 		patient.DELETE("/:id", s.patientHandler.Delete)
 	}
 
+	dailyPatientMeal := r.Group("/daily-patient-meal")
+	{
+		dailyPatientMeal.POST("", s.dailyPatientMealHandler.Create)
+		dailyPatientMeal.GET("", s.dailyPatientMealHandler.GetAll)
+		dailyPatientMeal.GET("/:id", s.dailyPatientMealHandler.GetByID)
+		dailyPatientMeal.PATCH("/:id", s.dailyPatientMealHandler.Update)
+		dailyPatientMeal.DELETE("/:id", s.dailyPatientMealHandler.Delete)
+	}
+
 	return r
 }

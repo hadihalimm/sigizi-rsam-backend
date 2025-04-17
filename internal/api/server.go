@@ -17,30 +17,31 @@ import (
 )
 
 type Server struct {
-	port            int
-	db              *config.Database
-	authHandler     *handler.AuthHandler
-	roomTypeHandler *handler.RoomTypeHandler
-	roomHandler     *handler.RoomHandler
-	foodHandler     *handler.FoodHandler
-	mealTypeHandler *handler.MealTypeHandler
-	mealItemHandler *handler.MealItemHandler
-	patientHandler  *handler.PatientHandler
+	port                    int
+	db                      *config.Database
+	authHandler             *handler.AuthHandler
+	roomTypeHandler         *handler.RoomTypeHandler
+	roomHandler             *handler.RoomHandler
+	foodHandler             *handler.FoodHandler
+	mealTypeHandler         *handler.MealTypeHandler
+	mealItemHandler         *handler.MealItemHandler
+	patientHandler          *handler.PatientHandler
+	dailyPatientMealHandler *handler.DailyPatientMealHandler
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db := config.ConnectToDatabase()
 
-	db.Gorm.Migrator().DropTable(&model.User{},
-		&model.RoomType{}, &model.Room{},
-		&model.Food{}, &model.MealType{}, &model.MealItem{},
-		&model.Patient{})
+	// db.Gorm.Migrator().DropTable(&model.User{},
+	// 	&model.RoomType{}, &model.Room{},
+	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
+	// 	&model.Patient{}, &model.DailyPatientMeal{})
 
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
 		&model.Food{}, &model.MealType{}, &model.MealItem{},
-		&model.Patient{})
+		&model.Patient{}, &model.DailyPatientMeal{})
 
 	validator := validator.New()
 
@@ -72,16 +73,21 @@ func NewServer() *http.Server {
 	patientService := service.NewPatientService(patientRepo, validator)
 	patientHandler := handler.NewPatientHandler(patientService)
 
+	dailyPatientMealRepo := repo.NewDailyPatientMealRepo(db)
+	dailyPatientMealService := service.NewDailyPatientMealService(dailyPatientMealRepo, validator)
+	dailyPatientMealHandler := handler.NewDailyPatientMealHandler(dailyPatientMealService)
+
 	NewServer := &Server{
-		port:            port,
-		db:              db,
-		authHandler:     authHandler,
-		roomTypeHandler: roomTypeHandler,
-		roomHandler:     roomHandler,
-		foodHandler:     foodHandler,
-		mealTypeHandler: mealTypeHandler,
-		mealItemHandler: mealItemHandler,
-		patientHandler:  patientHandler,
+		port:                    port,
+		db:                      db,
+		authHandler:             authHandler,
+		roomTypeHandler:         roomTypeHandler,
+		roomHandler:             roomHandler,
+		foodHandler:             foodHandler,
+		mealTypeHandler:         mealTypeHandler,
+		mealItemHandler:         mealItemHandler,
+		patientHandler:          patientHandler,
+		dailyPatientMealHandler: dailyPatientMealHandler,
 	}
 
 	httpServer := &http.Server{
