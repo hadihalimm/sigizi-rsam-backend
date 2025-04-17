@@ -44,7 +44,7 @@ func (h *FoodHandler) GetAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Successfully retrieved all room types",
+		"message": "Successfully retrieved all foods",
 		"data":    foods,
 	})
 }
