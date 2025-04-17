@@ -23,13 +23,24 @@ type Server struct {
 	roomTypeHandler *handler.RoomTypeHandler
 	roomHandler     *handler.RoomHandler
 	foodHandler     *handler.FoodHandler
+	mealTypeHandler *handler.MealTypeHandler
+	mealItemHandler *handler.MealItemHandler
+	patientHandler  *handler.PatientHandler
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db := config.ConnectToDatabase()
-	db.Gorm.Migrator().DropTable(&model.User{}, &model.RoomType{}, &model.Room{}, &model.Food{})
-	db.Gorm.AutoMigrate(&model.User{}, &model.RoomType{}, &model.Room{}, &model.Food{})
+
+	db.Gorm.Migrator().DropTable(&model.User{},
+		&model.RoomType{}, &model.Room{},
+		&model.Food{}, &model.MealType{}, &model.MealItem{},
+		&model.Patient{})
+
+	db.Gorm.AutoMigrate(&model.User{},
+		&model.RoomType{}, &model.Room{},
+		&model.Food{}, &model.MealType{}, &model.MealItem{},
+		&model.Patient{})
 
 	validator := validator.New()
 
@@ -49,6 +60,18 @@ func NewServer() *http.Server {
 	foodService := service.NewFoodService(foodRepo, validator)
 	foodHandler := handler.NewFoodHandler(foodService)
 
+	mealTypeRepo := repo.NewMealTypeRepo(db)
+	mealTypeService := service.NewMealTypeService(mealTypeRepo, validator)
+	mealTypeHandler := handler.NewMealTypeHandler(mealTypeService)
+
+	mealItemRepo := repo.NewMealItemRepo(db)
+	mealItemService := service.NewMealItemService(mealItemRepo, validator)
+	mealItemHandler := handler.NewMealItemHandler(mealItemService)
+
+	patientRepo := repo.NewPatientRepo(db)
+	patientService := service.NewPatientService(patientRepo, validator)
+	patientHandler := handler.NewPatientHandler(patientService)
+
 	NewServer := &Server{
 		port:            port,
 		db:              db,
@@ -56,6 +79,9 @@ func NewServer() *http.Server {
 		roomTypeHandler: roomTypeHandler,
 		roomHandler:     roomHandler,
 		foodHandler:     foodHandler,
+		mealTypeHandler: mealTypeHandler,
+		mealItemHandler: mealItemHandler,
+		patientHandler:  patientHandler,
 	}
 
 	httpServer := &http.Server{

@@ -43,5 +43,32 @@ func (s *Server) RegisterRoutes() http.Handler {
 		food.DELETE("/:id", s.foodHandler.Delete)
 	}
 
+	mealType := r.Group("/meal-type")
+	{
+		mealType.POST("", s.mealTypeHandler.Create)
+		mealType.GET("", s.mealTypeHandler.GetAll)
+		mealType.GET("/:id", s.mealTypeHandler.GetByID)
+		mealType.PATCH("/:id", s.mealTypeHandler.Update)
+		mealType.DELETE("/:id", s.mealTypeHandler.Delete)
+	}
+
+	mealItem := r.Group("/meal-item")
+	{
+		mealItem.POST("", s.mealItemHandler.Create)
+		mealItem.GET("", s.mealItemHandler.GetAll)
+		mealItem.GET("/:id", s.mealItemHandler.GetByID)
+		mealItem.PATCH("/:id", s.mealItemHandler.Update)
+		mealItem.DELETE("/:id", s.mealItemHandler.Delete)
+	}
+
+	patient := r.Group("/patient")
+	{
+		patient.POST("", s.patientHandler.Create)
+		patient.GET("", s.patientHandler.GetAll)
+		patient.GET("/:id", s.patientHandler.GetByID)
+		patient.PATCH("/:id", s.patientHandler.Update)
+		patient.DELETE("/:id", s.patientHandler.Delete)
+	}
+
 	return r
 }
