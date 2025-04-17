@@ -59,7 +59,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	session, err := config.SessionStore.Get(c.Request, "session-id")
+	session, err := config.SessionStore.Get(c.Request, "sigizi-session")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -67,7 +67,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	session.Values["user_id"] = user.ID
+	session.Values["userID"] = user.ID
 	session.Values["username"] = user.Username
 	session.Values["role"] = user.Role
 	err = session.Save(c.Request, c.Writer)
