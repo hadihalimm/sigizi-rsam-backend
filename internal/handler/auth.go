@@ -41,8 +41,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	})
 }
 
-func (h *AuthHandler) Login(c *gin.Context) {
-	var request request.Login
+func (h *AuthHandler) SignIn(c *gin.Context) {
+	var request request.SignIn
 	err := c.ShouldBindBodyWithJSON(&request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -51,7 +51,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := h.authService.Login(request)
+	user, err := h.authService.SignIn(request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),
@@ -79,7 +79,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful",
+		"message": "Sign in successful",
 	})
 }
 
