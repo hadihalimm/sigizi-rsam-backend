@@ -12,7 +12,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", s.authHandler.Register)
-		auth.POST("/login", s.authHandler.Login)
+		auth.POST("/sign-in", s.authHandler.SignIn)
 		auth.POST("/logout", s.authHandler.Logout)
 	}
 

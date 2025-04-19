@@ -12,7 +12,7 @@ import (
 
 type AuthService interface {
 	Register(request request.Register) (*model.User, error)
-	Login(request request.Login) (*model.User, error)
+	SignIn(request request.SignIn) (*model.User, error)
 }
 
 type authService struct {
@@ -49,7 +49,7 @@ func (s *authService) Register(request request.Register) (*model.User, error) {
 	return newUser, nil
 }
 
-func (s *authService) Login(request request.Login) (*model.User, error) {
+func (s *authService) SignIn(request request.SignIn) (*model.User, error) {
 	err := s.validate.Struct(request)
 	if err != nil {
 		return nil, err
