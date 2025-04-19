@@ -57,11 +57,14 @@ func (s *authService) SignIn(request request.SignIn) (*model.User, error) {
 
 	user, err := s.userRepo.FindByUsername(request.Username)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Invalid username or password")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password))
 	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return nil, errors.New("Invalid username or password")
+		}
 		return nil, err
 	}
 	return user, nil
