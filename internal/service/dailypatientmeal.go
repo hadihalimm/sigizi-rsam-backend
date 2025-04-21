@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
@@ -15,18 +16,25 @@ type DailyPatientMealService interface {
 	GetByID(id uint) (*model.DailyPatientMeal, error)
 	Update(id uint, request request.UpdateDailyPatientMeal) (*model.DailyPatientMeal, error)
 	Delete(id uint) error
+	FilterByDateAndRoomType(
+		date time.Time, roomTypeID uint) ([]model.DailyPatientMeal, error)
 }
 
 type dailyPatientMealService struct {
 	dailyPatientMealRepo repo.DailyPatientMealRepo
+	roomTypeRepo         repo.RoomTypeRepo
 	validate             *validator.Validate
 }
 
 func NewDailyPatientMealService(
 	dailyPatientMealRepo repo.DailyPatientMealRepo,
+	roomTypeRepo repo.RoomTypeRepo,
 	validate *validator.Validate,
 ) DailyPatientMealService {
-	return &dailyPatientMealService{dailyPatientMealRepo: dailyPatientMealRepo, validate: validate}
+	return &dailyPatientMealService{
+		dailyPatientMealRepo: dailyPatientMealRepo,
+		roomTypeRepo:         roomTypeRepo,
+		validate:             validate}
 }
 
 func (s *dailyPatientMealService) Create(request request.CreateDailyPatientMeal) (*model.DailyPatientMeal, error) {
@@ -35,7 +43,6 @@ func (s *dailyPatientMealService) Create(request request.CreateDailyPatientMeal)
 	}
 
 	newDailyMeal := &model.DailyPatientMeal{
-		Date:       request.Date,
 		PatientID:  request.PatientID,
 		RoomID:     request.RoomID,
 		MealTypeID: request.MealTypeID,
@@ -61,7 +68,6 @@ func (s *dailyPatientMealService) Update(id uint, request request.UpdateDailyPat
 		return nil, errors.New("daily patient meal not found")
 	}
 
-	meal.Date = request.Date
 	meal.PatientID = request.PatientID
 	meal.RoomID = request.RoomID
 	meal.MealTypeID = request.MealTypeID
@@ -71,4 +77,13 @@ func (s *dailyPatientMealService) Update(id uint, request request.UpdateDailyPat
 
 func (s *dailyPatientMealService) Delete(id uint) error {
 	return s.dailyPatientMealRepo.Delete(id)
+}
+
+func (s *dailyPatientMealService) FilterByDateAndRoomType(
+	date time.Time, roomTypeID uint) ([]model.DailyPatientMeal, error) {
+	_, err := s.roomTypeRepo.FindByID(roomTypeID)
+	if err != nil {
+		return nil, errors.New("room type not found")
+	}
+	return s.dailyPatientMealRepo.FilterByDateAndRoomType(date, roomTypeID)
 }
