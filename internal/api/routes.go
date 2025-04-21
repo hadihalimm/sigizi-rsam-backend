@@ -85,6 +85,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		dailyPatientMeal.GET("/:id", s.dailyPatientMealHandler.GetByID)
 		dailyPatientMeal.PATCH("/:id", s.dailyPatientMealHandler.Update)
 		dailyPatientMeal.DELETE("/:id", s.dailyPatientMealHandler.Delete)
+		dailyPatientMeal.GET("/filter", s.dailyPatientMealHandler.FilterByDateAndRoomType)
 	}
 
 	return r
