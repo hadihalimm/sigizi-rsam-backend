@@ -74,7 +74,7 @@ func NewServer() *http.Server {
 	patientHandler := handler.NewPatientHandler(patientService)
 
 	dailyPatientMealRepo := repo.NewDailyPatientMealRepo(db)
-	dailyPatientMealService := service.NewDailyPatientMealService(dailyPatientMealRepo, validator)
+	dailyPatientMealService := service.NewDailyPatientMealService(dailyPatientMealRepo, roomTypeRepo, validator)
 	dailyPatientMealHandler := handler.NewDailyPatientMealHandler(dailyPatientMealService)
 
 	NewServer := &Server{
