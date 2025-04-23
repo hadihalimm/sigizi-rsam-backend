@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
@@ -13,15 +15,23 @@ type RoomService interface {
 	GetByID(id uint) (*model.Room, error)
 	Update(id uint, request request.UpdateRoom) (*model.Room, error)
 	Delete(id uint) error
+	FilterByRoomType(roomTypeID uint) ([]model.Room, error)
 }
 
 type roomService struct {
-	roomRepo repo.RoomRepo
-	validate *validator.Validate
+	roomRepo     repo.RoomRepo
+	roomTypeRepo repo.RoomTypeRepo
+	validate     *validator.Validate
 }
 
-func NewRoomService(roomRepo repo.RoomRepo, validate *validator.Validate) RoomService {
-	return &roomService{roomRepo: roomRepo, validate: validate}
+func NewRoomService(
+	roomRepo repo.RoomRepo,
+	roomTypeRepo repo.RoomTypeRepo,
+	validate *validator.Validate) RoomService {
+	return &roomService{
+		roomRepo:     roomRepo,
+		roomTypeRepo: roomTypeRepo,
+		validate:     validate}
 }
 
 func (s *roomService) Create(request request.CreateRoom) (*model.Room, error) {
@@ -65,4 +75,12 @@ func (s *roomService) Update(id uint, request request.UpdateRoom) (*model.Room, 
 
 func (s *roomService) Delete(id uint) error {
 	return s.roomRepo.Delete(id)
+}
+
+func (s *roomService) FilterByRoomType(roomTypeID uint) ([]model.Room, error) {
+	_, err := s.roomTypeRepo.FindByID(roomTypeID)
+	if err != nil {
+		return nil, errors.New("RoomType not found")
+	}
+	return s.roomRepo.FilterByRoomType(roomTypeID)
 }

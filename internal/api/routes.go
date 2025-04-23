@@ -10,10 +10,10 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
 		AllowCredentials: true,
 	}))
 
@@ -40,6 +40,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		room.GET("/:id", s.roomHandler.GetByID)
 		room.PATCH("/:id", s.roomHandler.Update)
 		room.DELETE("/:id", s.roomHandler.Delete)
+		room.GET("/filter", s.roomHandler.FilterByRoomType)
 	}
 
 	food := r.Group("/food")

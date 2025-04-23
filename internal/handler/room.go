@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -95,5 +96,21 @@ func (h *RoomHandler) Delete(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Room type deleted successfully",
+	})
+}
+
+func (h *RoomHandler) FilterByRoomType(c *gin.Context) {
+	roomTypeUint64, _ := strconv.ParseUint(c.Query("roomType"), 10, 64)
+	roomType := uint(roomTypeUint64)
+
+	rooms, err := h.roomService.FilterByRoomType(roomType)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Rooms for RoomType %d retrieved successfully", roomType),
+		"data":    rooms,
 	})
 }

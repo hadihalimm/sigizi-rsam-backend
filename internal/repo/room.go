@@ -11,6 +11,7 @@ type RoomRepo interface {
 	FindByID(id uint) (*model.Room, error)
 	Update(room *model.Room) (*model.Room, error)
 	Delete(id uint) error
+	FilterByRoomType(roomTypeID uint) ([]model.Room, error)
 }
 
 type roomRepo struct {
@@ -63,4 +64,13 @@ func (r *roomRepo) Update(room *model.Room) (*model.Room, error) {
 func (r *roomRepo) Delete(id uint) error {
 	tx := r.db.Gorm.Delete(&model.Room{}, id)
 	return tx.Error
+}
+
+func (r *roomRepo) FilterByRoomType(roomTypeID uint) ([]model.Room, error) {
+	var rooms []model.Room
+	tx := r.db.Gorm.Preload("RoomType").Where("room_type_id = ?", roomTypeID).Find(&rooms)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return rooms, nil
 }
