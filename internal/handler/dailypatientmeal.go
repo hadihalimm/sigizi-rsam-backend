@@ -104,15 +104,12 @@ func (h *DailyPatientMealHandler) Delete(c *gin.Context) {
 func (h *DailyPatientMealHandler) FilterByDateAndRoomType(c *gin.Context) {
 	dateString := c.Query("date")
 	date, err := time.Parse("2006-01-02", dateString)
-	fmt.Println(dateString)
-	fmt.Println(date)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	roomTypeUint64, _ := strconv.ParseUint(c.Query("roomType"), 10, 64)
 	roomType := uint(roomTypeUint64)
-	fmt.Println(roomType)
 
 	meals, err := h.dailyPatientMealService.FilterByDateAndRoomType(date, roomType)
 	if err != nil {
