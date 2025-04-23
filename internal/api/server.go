@@ -54,7 +54,7 @@ func NewServer() *http.Server {
 	roomTypeHandler := handler.NewRoomTypeHandler(roomTypeService)
 
 	roomRepo := repo.NewRoomRepo(db)
-	roomService := service.NewRoomService(roomRepo, validator)
+	roomService := service.NewRoomService(roomRepo, roomTypeRepo, validator)
 	roomHandler := handler.NewRoomHandler(roomService)
 
 	foodRepo := repo.NewFoodRepo(db)
@@ -91,7 +91,7 @@ func NewServer() *http.Server {
 	}
 
 	httpServer := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
+		Addr:         fmt.Sprintf("0.0.0.0:%d", NewServer.port),
 		Handler:      NewServer.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
