@@ -97,3 +97,17 @@ func (h *PatientHandler) Delete(c *gin.Context) {
 		"message": "Patient deleted successfully",
 	})
 }
+
+func (h *PatientHandler) FilterByRMN(c *gin.Context) {
+	mrn := c.Query("mrn")
+	patient, err := h.patientService.FilterByMRN(mrn)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Patient retrieved successfully",
+		"data":    patient,
+	})
+}

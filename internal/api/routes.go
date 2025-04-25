@@ -77,6 +77,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		patient.GET("/:id", s.patientHandler.GetByID)
 		patient.PATCH("/:id", s.patientHandler.Update)
 		patient.DELETE("/:id", s.patientHandler.Delete)
+		patient.GET("/filter", s.patientHandler.FilterByRMN)
 	}
 
 	dailyPatientMeal := r.Group("/daily-patient-meal")

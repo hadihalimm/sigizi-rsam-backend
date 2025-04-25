@@ -12,6 +12,7 @@ type PatientRepo interface {
 	FindByID(id uint) (*model.Patient, error)
 	Update(patient *model.Patient) (*model.Patient, error)
 	Delete(id uint) error
+	FilterByMRN(mrn string) (*model.Patient, error)
 }
 
 type patientRepo struct {
@@ -59,4 +60,13 @@ func (r *patientRepo) Update(patient *model.Patient) (*model.Patient, error) {
 func (r *patientRepo) Delete(id uint) error {
 	tx := r.db.Gorm.Delete(&model.Patient{}, id)
 	return tx.Error
+}
+
+func (r *patientRepo) FilterByMRN(mrn string) (*model.Patient, error) {
+	var patient model.Patient
+	tx := r.db.Gorm.Where("medical_record_number = ?", mrn).First(&patient)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &patient, nil
 }

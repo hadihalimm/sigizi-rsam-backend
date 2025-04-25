@@ -13,6 +13,7 @@ type PatientService interface {
 	GetByID(id uint) (*model.Patient, error)
 	Update(id uint, request request.UpdatePatient) (*model.Patient, error)
 	Delete(id uint) error
+	FilterByMRN(mrn string) (*model.Patient, error)
 }
 
 type patientService struct {
@@ -63,4 +64,8 @@ func (s *patientService) Update(id uint, request request.UpdatePatient) (*model.
 
 func (s *patientService) Delete(id uint) error {
 	return s.patientRepo.Delete(id)
+}
+
+func (s *patientService) FilterByMRN(mrn string) (*model.Patient, error) {
+	return s.patientRepo.FilterByMRN(mrn)
 }
