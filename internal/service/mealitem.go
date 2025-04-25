@@ -31,7 +31,6 @@ func (s *mealItemService) Create(request request.CreateMealItem) (*model.MealIte
 	}
 
 	newItem := &model.MealItem{
-		Date:       request.Date,
 		MealTypeID: request.MealTypeID,
 		FoodID:     request.FoodID,
 		Quantity:   request.Quantity,
@@ -58,7 +57,6 @@ func (s *mealItemService) Update(id uint, request request.UpdateMealItem) (*mode
 		return nil, err
 	}
 
-	item.Date = request.Date
 	item.MealTypeID = request.MealTypeID
 	item.FoodID = request.FoodID
 	item.Quantity = request.Quantity
