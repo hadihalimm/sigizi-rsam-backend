@@ -74,7 +74,7 @@ func (r *dailyPatientMealRepo) FilterByDateAndRoomType(
 	var meals []model.DailyPatientMeal
 	tx := r.db.Gorm.Preload("Patient").Preload("Room").Preload("Room.RoomType").Preload("MealType").
 		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
-		Where("DATE(created_at) = ?", date.Format("2006-01-02")).
+		Where("DATE(daily_patient_meals.created_at) = ?", date.Format("2006-01-02")).
 		Where("rooms.room_type_id = ? ", roomType).
 		Find(&meals)
 
