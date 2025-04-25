@@ -14,6 +14,7 @@ type PatientService interface {
 	Update(id uint, request request.UpdatePatient) (*model.Patient, error)
 	Delete(id uint) error
 	FilterByMRN(mrn string) (*model.Patient, error)
+	FindAllWithPagination(limit int, offset int) ([]model.Patient, int64, error)
 }
 
 type patientService struct {
@@ -68,4 +69,8 @@ func (s *patientService) Delete(id uint) error {
 
 func (s *patientService) FilterByMRN(mrn string) (*model.Patient, error) {
 	return s.patientRepo.FilterByMRN(mrn)
+}
+
+func (s *patientService) FindAllWithPagination(limit int, offset int) ([]model.Patient, int64, error) {
+	return s.patientRepo.FindAllWithPagination(limit, offset)
 }

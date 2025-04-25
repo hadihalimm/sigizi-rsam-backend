@@ -13,6 +13,7 @@ type PatientRepo interface {
 	Update(patient *model.Patient) (*model.Patient, error)
 	Delete(id uint) error
 	FilterByMRN(mrn string) (*model.Patient, error)
+	FindAllWithPagination(limit int, offset int) ([]model.Patient, int64, error)
 }
 
 type patientRepo struct {
@@ -69,4 +70,22 @@ func (r *patientRepo) FilterByMRN(mrn string) (*model.Patient, error) {
 		return nil, tx.Error
 	}
 	return &patient, nil
+}
+
+func (r *patientRepo) FindAllWithPagination(limit int, offset int) ([]model.Patient, int64, error) {
+	var total int64
+	var patients []model.Patient
+	query := r.db.Gorm.Model(&model.Patient{})
+
+	tx := query.Count(&total)
+	if tx.Error != nil {
+		return nil, 0, tx.Error
+	}
+
+	tx = query.Limit(limit).Offset(offset).Find(&patients)
+	if tx.Error != nil {
+		return nil, 0, tx.Error
+	}
+
+	return patients, total, nil
 }

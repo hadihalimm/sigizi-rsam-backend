@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"math"
 	"net/http"
 	"strconv"
 
@@ -109,5 +110,31 @@ func (h *PatientHandler) FilterByRMN(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Patient retrieved successfully",
 		"data":    patient,
+	})
+}
+
+func (h *PatientHandler) GetAllWithPagination(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
+
+	page, _ := strconv.Atoi(pageStr)
+	limit, _ := strconv.Atoi(limitStr)
+	if page < 1 {
+		page = 1
+	}
+	offset := (page - 1) * limit
+
+	patients, total, err := h.patientService.FindAllWithPagination(limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":    "Patients retrieved successfully",
+		"data":       patients,
+		"limit":      limit,
+		"total":      total,
+		"totalPages": int(math.Ceil(float64(total) / float64(limit))),
 	})
 }
