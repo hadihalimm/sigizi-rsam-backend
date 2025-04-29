@@ -78,7 +78,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		patient.PATCH("/:id", s.patientHandler.Update)
 		patient.DELETE("/:id", s.patientHandler.Delete)
 		patient.GET("/filter", s.patientHandler.FilterByRMN)
-		patient.GET("/paginated", s.patientHandler.GetAllWithPagination)
+		patient.GET("/paginated", s.patientHandler.GetAllWithPaginationAndKeyword)
 	}
 
 	dailyPatientMeal := r.Group("/daily-patient-meal")
@@ -89,6 +89,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 		dailyPatientMeal.PATCH("/:id", s.dailyPatientMealHandler.Update)
 		dailyPatientMeal.DELETE("/:id", s.dailyPatientMealHandler.Delete)
 		dailyPatientMeal.GET("/filter", s.dailyPatientMealHandler.FilterByDateAndRoomType)
+	}
+
+	diet := r.Group("/diet")
+	{
+		diet.POST("", s.dietHandler.Create)
+		diet.GET("", s.dietHandler.GetAll)
+		diet.GET("/:id", s.dietHandler.GetByID)
+		diet.PATCH("/:id", s.dietHandler.Update)
+		diet.DELETE("/:id", s.dietHandler.Delete)
 	}
 
 	return r
