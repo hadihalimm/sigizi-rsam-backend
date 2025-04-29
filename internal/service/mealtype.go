@@ -32,6 +32,7 @@ func (s *mealTypeService) Create(request request.CreateMealType) (*model.MealTyp
 	}
 
 	newMealType := &model.MealType{
+		Code: request.Code,
 		Name: request.Name,
 	}
 	return s.mealTypeRepo.Create(newMealType)
@@ -54,6 +55,7 @@ func (s *mealTypeService) Update(id uint, request request.UpdateMealType) (*mode
 		return nil, errors.New("food not found")
 	}
 
+	mt.Code = request.Code
 	mt.Name = request.Name
 	return s.mealTypeRepo.Update(mt)
 }
