@@ -27,6 +27,7 @@ type Server struct {
 	mealItemHandler         *handler.MealItemHandler
 	patientHandler          *handler.PatientHandler
 	dailyPatientMealHandler *handler.DailyPatientMealHandler
+	dietHandler             *handler.DietHandler
 }
 
 func NewServer() *http.Server {
@@ -41,7 +42,7 @@ func NewServer() *http.Server {
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
 		&model.Food{}, &model.MealType{}, &model.MealItem{},
-		&model.Patient{}, &model.DailyPatientMeal{})
+		&model.Patient{}, &model.DailyPatientMeal{}, &model.Diet{})
 
 	validator := validator.New()
 
@@ -77,6 +78,10 @@ func NewServer() *http.Server {
 	dailyPatientMealService := service.NewDailyPatientMealService(dailyPatientMealRepo, roomTypeRepo, validator)
 	dailyPatientMealHandler := handler.NewDailyPatientMealHandler(dailyPatientMealService)
 
+	dietRepo := repo.NewDietRepo(db)
+	dietService := service.NewDietService(dietRepo, validator)
+	dietHandler := handler.NewDietHandler(dietService)
+
 	NewServer := &Server{
 		port:                    port,
 		db:                      db,
@@ -88,6 +93,7 @@ func NewServer() *http.Server {
 		mealItemHandler:         mealItemHandler,
 		patientHandler:          patientHandler,
 		dailyPatientMealHandler: dailyPatientMealHandler,
+		dietHandler:             dietHandler,
 	}
 
 	httpServer := &http.Server{
