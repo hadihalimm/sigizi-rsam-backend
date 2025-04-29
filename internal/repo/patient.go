@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"strings"
+
 	"github.com/hadihalimm/sigizi-rsam/internal/config"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
 	"gorm.io/gorm"
@@ -13,7 +15,7 @@ type PatientRepo interface {
 	Update(patient *model.Patient) (*model.Patient, error)
 	Delete(id uint) error
 	FilterByMRN(mrn string) (*model.Patient, error)
-	FindAllWithPagination(limit int, offset int) ([]model.Patient, int64, error)
+	FindAllWithPaginationAndKeyword(limit int, offset int, keyword string) ([]model.Patient, int64, error)
 }
 
 type patientRepo struct {
@@ -72,10 +74,17 @@ func (r *patientRepo) FilterByMRN(mrn string) (*model.Patient, error) {
 	return &patient, nil
 }
 
-func (r *patientRepo) FindAllWithPagination(limit int, offset int) ([]model.Patient, int64, error) {
+func (r *patientRepo) FindAllWithPaginationAndKeyword(
+	limit int, offset int, keyword string) ([]model.Patient, int64, error) {
 	var total int64
 	var patients []model.Patient
 	query := r.db.Gorm.Model(&model.Patient{})
+
+	if keyword != "" {
+		like := "%" + keyword + "%"
+		query = query.Where("LOWER(name) LIKE ? OR LOWER(medical_record_number) LIKE ?",
+			strings.ToLower(like), strings.ToLower(like))
+	}
 
 	tx := query.Count(&total)
 	if tx.Error != nil {
