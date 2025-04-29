@@ -13,4 +13,5 @@ type DailyPatientMeal struct {
 	Patient    Patient   `json:"patient"`
 	Room       Room      `json:"room"`
 	MealType   MealType  `json:"mealType"`
+	Diets      []Diet    `gorm:"many2many:daily_patient_meal_diets;" json:"diets"`
 }

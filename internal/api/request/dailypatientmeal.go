@@ -5,6 +5,7 @@ type CreateDailyPatientMeal struct {
 	RoomID     uint   `json:"roomID" binding:"required" validate:"required"`
 	MealTypeID uint   `json:"mealTypeID" binding:"required" validate:"required"`
 	Notes      string `json:"notes"`
+	DietIDs    []uint `json:"dietIDs"`
 }
 
 type UpdateDailyPatientMeal struct {
@@ -12,4 +13,5 @@ type UpdateDailyPatientMeal struct {
 	RoomID     uint   `json:"roomID" binding:"required" validate:"required"`
 	MealTypeID uint   `json:"mealTypeID" binding:"required" validate:"required"`
 	Notes      string `json:"notes"`
+	DietIDs    []uint `json:"dietIDs"`
 }

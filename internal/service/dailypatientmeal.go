@@ -48,7 +48,22 @@ func (s *dailyPatientMealService) Create(request request.CreateDailyPatientMeal)
 		MealTypeID: request.MealTypeID,
 		Notes:      request.Notes,
 	}
-	return s.dailyPatientMealRepo.Create(newDailyMeal)
+
+	meal, err := s.dailyPatientMealRepo.Create(newDailyMeal)
+	if err != nil {
+		return nil, err
+	}
+	if len(request.DietIDs) > 0 {
+		err := s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
+		if err != nil {
+			return nil, err
+		}
+	}
+	meal, err = s.dailyPatientMealRepo.FindByID(meal.ID)
+	if err != nil {
+		return nil, err
+	}
+	return meal, nil
 }
 
 func (s *dailyPatientMealService) GetAll() ([]model.DailyPatientMeal, error) {
@@ -72,7 +87,22 @@ func (s *dailyPatientMealService) Update(id uint, request request.UpdateDailyPat
 	meal.RoomID = request.RoomID
 	meal.MealTypeID = request.MealTypeID
 	meal.Notes = request.Notes
-	return s.dailyPatientMealRepo.Update(meal)
+
+	meal, err = s.dailyPatientMealRepo.Update(meal)
+	if err != nil {
+		return nil, err
+	}
+	if len(request.DietIDs) > 0 {
+		err := s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
+		if err != nil {
+			return nil, err
+		}
+	}
+	meal, err = s.dailyPatientMealRepo.FindByID(meal.ID)
+	if err != nil {
+		return nil, err
+	}
+	return meal, nil
 }
 
 func (s *dailyPatientMealService) Delete(id uint) error {

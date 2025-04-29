@@ -15,6 +15,7 @@ type DailyPatientMealRepo interface {
 	Delete(id uint) error
 	FilterByDateAndRoomType(
 		date time.Time, roomType uint) ([]model.DailyPatientMeal, error)
+	ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error
 }
 
 type dailyPatientMealRepo struct {
@@ -30,7 +31,8 @@ func (r *dailyPatientMealRepo) Create(meal *model.DailyPatientMeal) (*model.Dail
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	tx = r.db.Gorm.First(&meal, meal.ID)
+
+	tx = r.db.Gorm.Preload("Diets").First(&meal, meal.ID)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -48,7 +50,7 @@ func (r *dailyPatientMealRepo) FindAll() ([]model.DailyPatientMeal, error) {
 
 func (r *dailyPatientMealRepo) FindByID(id uint) (*model.DailyPatientMeal, error) {
 	var meal model.DailyPatientMeal
-	tx := r.db.Gorm.First(&meal, id)
+	tx := r.db.Gorm.Preload("Diets").First(&meal, id)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -57,6 +59,10 @@ func (r *dailyPatientMealRepo) FindByID(id uint) (*model.DailyPatientMeal, error
 
 func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error) {
 	tx := r.db.Gorm.Save(meal)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	tx = r.db.Gorm.Preload("Diets").First(&meal, meal.ID)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -82,4 +88,14 @@ func (r *dailyPatientMealRepo) FilterByDateAndRoomType(
 		return nil, tx.Error
 	}
 	return meals, nil
+}
+
+func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error {
+	var diets []model.Diet
+	tx := r.db.Gorm.Where("id IN ?", dietIDs).Find(&diets)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return r.db.Gorm.Model(meal).Association("Diets").Replace(diets)
 }
