@@ -113,9 +113,10 @@ func (h *PatientHandler) FilterByRMN(c *gin.Context) {
 	})
 }
 
-func (h *PatientHandler) GetAllWithPagination(c *gin.Context) {
+func (h *PatientHandler) GetAllWithPaginationAndKeyword(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "10")
+	keyword := c.Query("keyword")
 
 	page, _ := strconv.Atoi(pageStr)
 	limit, _ := strconv.Atoi(limitStr)
@@ -124,7 +125,7 @@ func (h *PatientHandler) GetAllWithPagination(c *gin.Context) {
 	}
 	offset := (page - 1) * limit
 
-	patients, total, err := h.patientService.FindAllWithPagination(limit, offset)
+	patients, total, err := h.patientService.FindAllWithPaginationAndKeyword(limit, offset, keyword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
