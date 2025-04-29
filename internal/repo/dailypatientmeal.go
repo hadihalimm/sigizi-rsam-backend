@@ -97,5 +97,5 @@ func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietID
 		return tx.Error
 	}
 
-	return r.db.Gorm.Model(meal).Association("Diets").Replace(diets)
+	return r.db.Gorm.Model(&meal).Association("Diets").Replace(diets)
 }
