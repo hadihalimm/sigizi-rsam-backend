@@ -5,7 +5,6 @@ import (
 
 	"github.com/hadihalimm/sigizi-rsam/internal/config"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
-	"gorm.io/gorm"
 )
 
 type PatientRepo interface {
@@ -16,6 +15,7 @@ type PatientRepo interface {
 	Delete(id uint) error
 	FilterByMRN(mrn string) (*model.Patient, error)
 	FindAllWithPaginationAndKeyword(limit int, offset int, keyword string) ([]model.Patient, int64, error)
+	ReplaceAllergies(patient *model.Patient, allergyIDs []uint) error
 }
 
 type patientRepo struct {
@@ -36,7 +36,7 @@ func (r *patientRepo) Create(patient *model.Patient) (*model.Patient, error) {
 
 func (r *patientRepo) FindAll() ([]model.Patient, error) {
 	var patients []model.Patient
-	tx := r.db.Gorm.Find(&patients)
+	tx := r.db.Gorm.Preload("Allergies").Find(&patients)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -45,7 +45,7 @@ func (r *patientRepo) FindAll() ([]model.Patient, error) {
 
 func (r *patientRepo) FindByID(id uint) (*model.Patient, error) {
 	var patient model.Patient
-	tx := r.db.Gorm.First(&patient, id)
+	tx := r.db.Gorm.Preload("Allergies").First(&patient, id)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -53,7 +53,11 @@ func (r *patientRepo) FindByID(id uint) (*model.Patient, error) {
 }
 
 func (r *patientRepo) Update(patient *model.Patient) (*model.Patient, error) {
-	tx := r.db.Gorm.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&patient)
+	tx := r.db.Gorm.Save(patient)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	tx = r.db.Gorm.Preload("Allergies").First(&patient, patient.ID)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -61,7 +65,16 @@ func (r *patientRepo) Update(patient *model.Patient) (*model.Patient, error) {
 }
 
 func (r *patientRepo) Delete(id uint) error {
-	tx := r.db.Gorm.Delete(&model.Patient{}, id)
+	var allergy model.Allergy
+	tx := r.db.Gorm.Preload("Allergies").First(&allergy, id)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	err := r.db.Gorm.Model(&allergy).Association("Allergies").Clear()
+	if err != nil {
+		return err
+	}
+	tx = r.db.Gorm.Delete(&model.Patient{}, id)
 	return tx.Error
 }
 
@@ -97,4 +110,16 @@ func (r *patientRepo) FindAllWithPaginationAndKeyword(
 	}
 
 	return patients, total, nil
+}
+
+func (r *patientRepo) ReplaceAllergies(patient *model.Patient, allergyIDs []uint) error {
+	var allergies []model.Allergy
+	if len(allergyIDs) == 0 {
+		return r.db.Gorm.Model(&patient).Association("Allergies").Clear()
+	}
+	tx := r.db.Gorm.Where("id IN ?", allergyIDs).Find(&allergies)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return r.db.Gorm.Model(&patient).Association("Allergies").Replace(allergies)
 }

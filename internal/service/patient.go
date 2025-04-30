@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
@@ -36,7 +38,20 @@ func (s *patientService) Create(request request.CreatePatient) (*model.Patient, 
 		Name:                request.Name,
 		DateOfBirth:         request.DateOfBirth,
 	}
-	return s.patientRepo.Create(newPatient)
+
+	patient, err := s.patientRepo.Create(newPatient)
+	if err != nil {
+		return nil, err
+	}
+	err = s.patientRepo.ReplaceAllergies(patient, request.AllergyIDs)
+	if err != nil {
+		return nil, err
+	}
+	patient, err = s.patientRepo.FindByID(patient.ID)
+	if err != nil {
+		return nil, err
+	}
+	return patient, err
 }
 
 func (s *patientService) GetAll() ([]model.Patient, error) {
@@ -54,13 +69,26 @@ func (s *patientService) Update(id uint, request request.UpdatePatient) (*model.
 
 	patient, err := s.patientRepo.FindByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("patient not found")
 	}
 
 	patient.Name = request.Name
 	patient.MedicalRecordNumber = request.MedicalRecordNumber
 	patient.DateOfBirth = request.DateOfBirth
-	return s.patientRepo.Update(patient)
+
+	patient, err = s.patientRepo.Update(patient)
+	if err != nil {
+		return nil, err
+	}
+	err = s.patientRepo.ReplaceAllergies(patient, request.AllergyIDs)
+	if err != nil {
+		return nil, err
+	}
+	patient, err = s.patientRepo.FindByID(patient.ID)
+	if err != nil {
+		return nil, err
+	}
+	return patient, nil
 }
 
 func (s *patientService) Delete(id uint) error {
