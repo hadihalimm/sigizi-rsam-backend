@@ -53,11 +53,10 @@ func (s *dailyPatientMealService) Create(request request.CreateDailyPatientMeal)
 	if err != nil {
 		return nil, err
 	}
-	if len(request.DietIDs) > 0 {
-		err := s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
-		if err != nil {
-			return nil, err
-		}
+
+	err = s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
+	if err != nil {
+		return nil, err
 	}
 	meal, err = s.dailyPatientMealRepo.FindByID(meal.ID)
 	if err != nil {
@@ -92,11 +91,9 @@ func (s *dailyPatientMealService) Update(id uint, request request.UpdateDailyPat
 	if err != nil {
 		return nil, err
 	}
-	if len(request.DietIDs) > 0 {
-		err := s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
-		if err != nil {
-			return nil, err
-		}
+	err = s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
+	if err != nil {
+		return nil, err
 	}
 	meal, err = s.dailyPatientMealRepo.FindByID(meal.ID)
 	if err != nil {
