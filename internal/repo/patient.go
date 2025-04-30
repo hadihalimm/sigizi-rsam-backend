@@ -65,12 +65,12 @@ func (r *patientRepo) Update(patient *model.Patient) (*model.Patient, error) {
 }
 
 func (r *patientRepo) Delete(id uint) error {
-	var allergy model.Allergy
-	tx := r.db.Gorm.Preload("Allergies").First(&allergy, id)
+	var patient model.Patient
+	tx := r.db.Gorm.Preload("Allergies").First(&patient, id)
 	if tx.Error != nil {
 		return tx.Error
 	}
-	err := r.db.Gorm.Model(&allergy).Association("Allergies").Clear()
+	err := r.db.Gorm.Model(&patient).Association("Allergies").Clear()
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (r *patientRepo) FindAllWithPaginationAndKeyword(
 		return nil, 0, tx.Error
 	}
 
-	tx = query.Limit(limit).Offset(offset).Find(&patients)
+	tx = query.Limit(limit).Offset(offset).Preload("Allergies").Find(&patients)
 	if tx.Error != nil {
 		return nil, 0, tx.Error
 	}
