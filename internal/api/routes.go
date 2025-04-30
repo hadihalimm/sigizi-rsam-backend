@@ -100,5 +100,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 		diet.DELETE("/:id", s.dietHandler.Delete)
 	}
 
+	allergy := r.Group("/allergy")
+	{
+		allergy.POST("", s.allergyHandler.Create)
+		allergy.GET("", s.allergyHandler.GetAll)
+		allergy.GET("/:id", s.allergyHandler.GetByID)
+		allergy.PATCH("/:id", s.allergyHandler.Update)
+		allergy.DELETE("/:id", s.allergyHandler.Delete)
+	}
+
 	return r
 }

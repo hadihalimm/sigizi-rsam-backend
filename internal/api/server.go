@@ -28,6 +28,7 @@ type Server struct {
 	patientHandler          *handler.PatientHandler
 	dailyPatientMealHandler *handler.DailyPatientMealHandler
 	dietHandler             *handler.DietHandler
+	allergyHandler          *handler.AllergyHandler
 }
 
 func NewServer() *http.Server {
@@ -38,11 +39,13 @@ func NewServer() *http.Server {
 	// 	&model.RoomType{}, &model.Room{},
 	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
 	// 	&model.Patient{}, &model.DailyPatientMeal{})
+	// db.Gorm.Migrator().DropTable(&model.Allergy{}, &model.Patient{})
 
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
 		&model.Food{}, &model.MealType{}, &model.MealItem{},
-		&model.Patient{}, &model.DailyPatientMeal{}, &model.Diet{})
+		&model.Patient{}, &model.DailyPatientMeal{}, &model.Diet{},
+		&model.Allergy{})
 
 	validator := validator.New()
 
@@ -82,6 +85,10 @@ func NewServer() *http.Server {
 	dietService := service.NewDietService(dietRepo, validator)
 	dietHandler := handler.NewDietHandler(dietService)
 
+	allergyRepo := repo.NewAllergyRepo(db)
+	allergyService := service.NewAllergyService(allergyRepo, validator)
+	allergyHandler := handler.NewAllergyHandler(allergyService)
+
 	NewServer := &Server{
 		port:                    port,
 		db:                      db,
@@ -94,6 +101,7 @@ func NewServer() *http.Server {
 		patientHandler:          patientHandler,
 		dailyPatientMealHandler: dailyPatientMealHandler,
 		dietHandler:             dietHandler,
+		allergyHandler:          allergyHandler,
 	}
 
 	httpServer := &http.Server{
