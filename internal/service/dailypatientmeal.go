@@ -18,6 +18,8 @@ type DailyPatientMealService interface {
 	Delete(id uint) error
 	FilterByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]model.DailyPatientMeal, error)
+	CountByDateAndRoomType(
+		date time.Time, roomTypeID uint) ([]repo.MealMatrixEntry, error)
 }
 
 type dailyPatientMealService struct {
@@ -46,6 +48,7 @@ func (s *dailyPatientMealService) Create(request request.CreateDailyPatientMeal)
 		PatientID:  request.PatientID,
 		RoomID:     request.RoomID,
 		MealTypeID: request.MealTypeID,
+		Date:       request.Date.Truncate((24 * time.Hour)),
 		Notes:      request.Notes,
 	}
 
@@ -113,4 +116,17 @@ func (s *dailyPatientMealService) FilterByDateAndRoomType(
 		return nil, errors.New("room type not found")
 	}
 	return s.dailyPatientMealRepo.FilterByDateAndRoomType(date, roomTypeID)
+}
+
+func (s *dailyPatientMealService) CountByDateAndRoomType(
+	date time.Time, roomTypeID uint) ([]repo.MealMatrixEntry, error) {
+	if roomTypeID == 0 {
+		return s.dailyPatientMealRepo.CountByDateForAllRoomTypes(date)
+	}
+
+	_, err := s.roomTypeRepo.FindByID(roomTypeID)
+	if err != nil {
+		return nil, errors.New("room type not found")
+	}
+	return s.dailyPatientMealRepo.CountByDateAndRoomType(date, roomTypeID)
 }

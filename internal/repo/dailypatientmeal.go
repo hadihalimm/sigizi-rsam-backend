@@ -16,6 +16,10 @@ type DailyPatientMealRepo interface {
 	FilterByDateAndRoomType(
 		date time.Time, roomType uint) ([]model.DailyPatientMeal, error)
 	ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error
+	CountByDateAndRoomType(
+		date time.Time, roomTypeID uint) ([]MealMatrixEntry, error)
+	CountByDateForAllRoomTypes(
+		date time.Time) ([]MealMatrixEntry, error)
 }
 
 type dailyPatientMealRepo struct {
@@ -87,7 +91,7 @@ func (r *dailyPatientMealRepo) FilterByDateAndRoomType(
 	date time.Time, roomType uint) ([]model.DailyPatientMeal, error) {
 
 	var meals []model.DailyPatientMeal
-	tx := r.db.Gorm.Preload("Patient").Preload("Room").
+	tx := r.db.Gorm.Preload("Patient").Preload("Patient.Allergies").Preload("Room").
 		Preload("Room.RoomType").Preload("MealType").Preload("Diets").
 		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
 		Where("DATE(daily_patient_meals.created_at) = ?", date.Format("2006-01-02")).
@@ -110,4 +114,49 @@ func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietID
 		return tx.Error
 	}
 	return r.db.Gorm.Model(&meal).Association("Diets").Replace(diets)
+}
+
+type MealMatrixEntry struct {
+	TreatmentClass string `json:"treatmentClass"`
+	MealType       string `json:"mealType"`
+	MealCount      string `json:"mealCount"`
+}
+
+func (r *dailyPatientMealRepo) CountByDateAndRoomType(
+	date time.Time, roomTypeID uint) ([]MealMatrixEntry, error) {
+
+	var results []MealMatrixEntry
+	tx := r.db.Gorm.Table("daily_patient_meals").
+		Select("rooms.treatment_class AS treatment_class, meal_types.code AS meal_type, COUNT(daily_patient_meals.id) AS meal_count").
+		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
+		Joins("JOIN meal_types ON meal_types.id = daily_patient_meals.meal_type_id").
+		Where("rooms.room_type_id = ?", roomTypeID).
+		Where("DATE(daily_patient_meals.created_at) = ?", date.Format("2006-01-02")).
+		Group("rooms.treatment_class, meal_types.name").
+		Order("rooms.treatment_class, meal_types.name").
+		Scan(&results)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return results, nil
+}
+
+func (r *dailyPatientMealRepo) CountByDateForAllRoomTypes(
+	date time.Time) ([]MealMatrixEntry, error) {
+
+	var results []MealMatrixEntry
+	tx := r.db.Gorm.Table("daily_patient_meals").
+		Select("rooms.treatment_class AS treatment_class, meal_types.code AS meal_type, COUNT(daily_patient_meals.id) AS meal_count").
+		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
+		Joins("JOIN meal_types ON meal_types.id = daily_patient_meals.meal_type_id").
+		Where("DATE(daily_patient_meals.created_at) = ?", date.Format("2006-01-02")).
+		Group("rooms.treatment_class, meal_types.name").
+		Order("rooms.treatment_class, meal_types.name").
+		Scan(&results)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return results, nil
 }
