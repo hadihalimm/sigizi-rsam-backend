@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
@@ -36,7 +37,7 @@ func (s *patientService) Create(request request.CreatePatient) (*model.Patient, 
 	newPatient := &model.Patient{
 		MedicalRecordNumber: request.MedicalRecordNumber,
 		Name:                request.Name,
-		DateOfBirth:         request.DateOfBirth,
+		DateOfBirth:         request.DateOfBirth.Truncate((24 * time.Hour)),
 	}
 
 	patient, err := s.patientRepo.Create(newPatient)
