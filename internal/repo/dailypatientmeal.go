@@ -15,6 +15,7 @@ type DailyPatientMealRepo interface {
 	Delete(id uint) error
 	FilterByDateAndRoomType(
 		date time.Time, roomType uint) ([]model.DailyPatientMeal, error)
+	FilterByDate(date time.Time) ([]model.DailyPatientMeal, error)
 	ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error
 	CountByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]MealMatrixEntry, error)
@@ -87,6 +88,18 @@ func (r *dailyPatientMealRepo) Delete(id uint) error {
 	return tx.Error
 }
 
+func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error {
+	var diets []model.Diet
+	if len(dietIDs) == 0 {
+		return r.db.Gorm.Model(&meal).Association("Diets").Clear()
+	}
+	tx := r.db.Gorm.Where("id IN ?", dietIDs).Find(&diets)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return r.db.Gorm.Model(&meal).Association("Diets").Replace(diets)
+}
+
 func (r *dailyPatientMealRepo) FilterByDateAndRoomType(
 	date time.Time, roomType uint) ([]model.DailyPatientMeal, error) {
 
@@ -104,16 +117,18 @@ func (r *dailyPatientMealRepo) FilterByDateAndRoomType(
 	return meals, nil
 }
 
-func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error {
-	var diets []model.Diet
-	if len(dietIDs) == 0 {
-		return r.db.Gorm.Model(&meal).Association("Diets").Clear()
-	}
-	tx := r.db.Gorm.Where("id IN ?", dietIDs).Find(&diets)
+func (r *dailyPatientMealRepo) FilterByDate(date time.Time) ([]model.DailyPatientMeal, error) {
+	var meals []model.DailyPatientMeal
+	tx := r.db.Gorm.Preload("Patient").Preload("Patient.Allergies").Preload("Room").
+		Preload("Room.RoomType").Preload("MealType").Preload("Diets").
+		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
+		Where("DATE(daily_patient_meals.date) = ?", date.Format("2006-01-02")).
+		Find(&meals)
+
 	if tx.Error != nil {
-		return tx.Error
+		return nil, tx.Error
 	}
-	return r.db.Gorm.Model(&meal).Association("Diets").Replace(diets)
+	return meals, nil
 }
 
 type MealMatrixEntry struct {
