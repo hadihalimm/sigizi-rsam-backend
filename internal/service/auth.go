@@ -38,6 +38,7 @@ func (s *authService) Register(request request.Register) (*model.User, error) {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	newUser := &model.User{
 		Username:     request.Username,
+		Name:         request.Name,
 		PasswordHash: string(hashedPassword),
 		Role:         request.Role,
 	}
