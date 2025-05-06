@@ -2,12 +2,15 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
 	"github.com/hadihalimm/sigizi-rsam/internal/repo"
+	"github.com/xuri/excelize/v2"
 )
 
 type DailyPatientMealService interface {
@@ -20,6 +23,7 @@ type DailyPatientMealService interface {
 		date time.Time, roomTypeID uint) ([]model.DailyPatientMeal, error)
 	CountByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]repo.MealMatrixEntry, error)
+	ExportToExcel(date time.Time) (*excelize.File, error)
 }
 
 type dailyPatientMealService struct {
@@ -111,11 +115,19 @@ func (s *dailyPatientMealService) Delete(id uint) error {
 
 func (s *dailyPatientMealService) FilterByDateAndRoomType(
 	date time.Time, roomTypeID uint) ([]model.DailyPatientMeal, error) {
+	fmt.Println(roomTypeID)
+	if roomTypeID == 0 {
+		return s.FilterByDate(date)
+	}
 	_, err := s.roomTypeRepo.FindByID(roomTypeID)
 	if err != nil {
 		return nil, errors.New("room type not found")
 	}
 	return s.dailyPatientMealRepo.FilterByDateAndRoomType(date, roomTypeID)
+}
+
+func (s *dailyPatientMealService) FilterByDate(date time.Time) ([]model.DailyPatientMeal, error) {
+	return s.dailyPatientMealRepo.FilterByDate(date)
 }
 
 func (s *dailyPatientMealService) CountByDateAndRoomType(
@@ -129,4 +141,53 @@ func (s *dailyPatientMealService) CountByDateAndRoomType(
 		return nil, errors.New("room type not found")
 	}
 	return s.dailyPatientMealRepo.CountByDateAndRoomType(date, roomTypeID)
+}
+
+func (s *dailyPatientMealService) ExportToExcel(date time.Time) (*excelize.File, error) {
+	meals, err := s.FilterByDate(date)
+	if err != nil {
+		return nil, err
+	}
+
+	f := excelize.NewFile()
+	sheet := "Permintaan Makanan"
+	f.NewSheet(sheet)
+
+	headers := []string{"ID", "Nama Pasien", "No. MR", "Tanggal Lahir", "Tipe Kamar", "Diet", "Catatan"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+
+	for i, m := range meals {
+		row := i + 2
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), m.ID)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), m.Patient.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), m.Patient.MedicalRecordNumber)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), m.Patient.DateOfBirth.Format("2006-01-02"))
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), m.Room.RoomNumber)
+		f.SetCellValue(sheet, fmt.Sprintf("F%d", row), fmt.Sprintf("%s%s %s", m.MealType.Code,
+			strings.Join(extractDietCodes(m.Diets), ""),
+			strings.Join(extractAllergyCodes(m.Patient.Allergies), "")))
+		f.SetCellValue(sheet, fmt.Sprintf("G%d", row), m.Notes)
+	}
+
+	f.DeleteSheet("Sheet1")
+	return f, nil
+}
+
+func extractDietCodes(diets []model.Diet) []string {
+	names := make([]string, len(diets))
+	for i, d := range diets {
+		names[i] = d.Code
+	}
+	return names
+}
+
+func extractAllergyCodes(allergies []model.Allergy) []string {
+	names := make([]string, len(allergies))
+	for i, a := range allergies {
+		names[i] = a.Code
+	}
+	return names
 }
