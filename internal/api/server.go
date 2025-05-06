@@ -20,6 +20,7 @@ type Server struct {
 	port                    int
 	db                      *config.Database
 	authHandler             *handler.AuthHandler
+	userHandler             *handler.UserHandler
 	roomTypeHandler         *handler.RoomTypeHandler
 	roomHandler             *handler.RoomHandler
 	foodHandler             *handler.FoodHandler
@@ -39,7 +40,7 @@ func NewServer() *http.Server {
 	// 	&model.RoomType{}, &model.Room{},
 	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
 	// 	&model.Patient{}, &model.DailyPatientMeal{})
-	// db.Gorm.Migrator().DropTable(&model.Allergy{}, &model.Patient{})
+	// db.Gorm.Migrator().DropTable(&model.User{})
 
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
@@ -51,7 +52,9 @@ func NewServer() *http.Server {
 
 	userRepo := repo.NewUserRepo(db)
 	authService := service.NewAuthService(userRepo, validator)
+	userService := service.NewUserService(userRepo, validator)
 	authHandler := handler.NewAuthHandler(authService)
+	userHandler := handler.NewUserHandler(userService)
 
 	roomTypeRepo := repo.NewRoomTypeRepo(db)
 	roomTypeService := service.NewRoomTypeService(roomTypeRepo, validator)
@@ -93,6 +96,7 @@ func NewServer() *http.Server {
 		port:                    port,
 		db:                      db,
 		authHandler:             authHandler,
+		userHandler:             userHandler,
 		roomTypeHandler:         roomTypeHandler,
 		roomHandler:             roomHandler,
 		foodHandler:             foodHandler,
