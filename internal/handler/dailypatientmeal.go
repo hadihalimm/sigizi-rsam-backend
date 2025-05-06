@@ -148,3 +148,27 @@ func (h *DailyPatientMealHandler) CountByDateAndRoomType(c *gin.Context) {
 		"data":    matrix,
 	})
 }
+
+func (h *DailyPatientMealHandler) ExportToExcel(c *gin.Context) {
+	dateString := c.Query("date")
+	date, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	file, err := h.dailyPatientMealService.ExportToExcel(date)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to export Excel"})
+		return
+	}
+
+	filename := fmt.Sprintf("permintaan_makanan_%s.xlsx", date.Format("02_01_2006"))
+	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.Header("Content-Transfer-Encoding", "binary")
+
+	if err := file.Write(c.Writer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write file to response"})
+	}
+}
