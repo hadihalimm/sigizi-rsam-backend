@@ -24,6 +24,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 		auth.POST("/logout", s.authHandler.Logout)
 	}
 
+	user := r.Group("/user")
+	{
+		user.GET("", s.userHandler.GetAll)
+		user.GET("/:id", s.userHandler.GetByID)
+		user.PATCH("/:id", s.userHandler.Update)
+		user.DELETE("/:id", s.userHandler.Delete)
+		user.POST("/:id/actions/reset-password", s.userHandler.ResetPassword)
+		user.POST("/:id/actions/change-password", s.userHandler.UpdatePassword)
+	}
+
 	roomType := r.Group("/room-type")
 	{
 		roomType.POST("", s.roomTypeHandler.Create)
@@ -89,6 +99,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 		dailyPatientMeal.PATCH("/:id", s.dailyPatientMealHandler.Update)
 		dailyPatientMeal.DELETE("/:id", s.dailyPatientMealHandler.Delete)
 		dailyPatientMeal.GET("/filter", s.dailyPatientMealHandler.FilterByDateAndRoomType)
+		dailyPatientMeal.GET("/count", s.dailyPatientMealHandler.CountByDateAndRoomType)
+		dailyPatientMeal.GET("/export", s.dailyPatientMealHandler.ExportToExcel)
 	}
 
 	diet := r.Group("/diet")
