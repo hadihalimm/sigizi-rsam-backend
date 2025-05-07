@@ -108,7 +108,7 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Successfully reset user password",
+		"message": "Successfully update user password",
 		"data":    user,
 	})
 }
