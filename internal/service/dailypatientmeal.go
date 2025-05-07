@@ -115,7 +115,6 @@ func (s *dailyPatientMealService) Delete(id uint) error {
 
 func (s *dailyPatientMealService) FilterByDateAndRoomType(
 	date time.Time, roomTypeID uint) ([]model.DailyPatientMeal, error) {
-	fmt.Println(roomTypeID)
 	if roomTypeID == 0 {
 		return s.FilterByDate(date)
 	}
