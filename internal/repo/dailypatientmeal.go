@@ -107,7 +107,7 @@ func (r *dailyPatientMealRepo) FilterByDateAndRoomType(
 	tx := r.db.Gorm.Preload("Patient").Preload("Patient.Allergies").Preload("Room").
 		Preload("Room.RoomType").Preload("MealType").Preload("Diets").
 		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
-		Where("DATE(daily_patient_meals.created_at) = ?", date.Format("2006-01-02")).
+		Where("DATE(daily_patient_meals.date) = ?", date.Format("2006-01-02")).
 		Where("rooms.room_type_id = ? ", roomType).
 		Find(&meals)
 
@@ -146,7 +146,7 @@ func (r *dailyPatientMealRepo) CountByDateAndRoomType(
 		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
 		Joins("JOIN meal_types ON meal_types.id = daily_patient_meals.meal_type_id").
 		Where("rooms.room_type_id = ?", roomTypeID).
-		Where("DATE(daily_patient_meals.created_at) = ?", date.Format("2006-01-02")).
+		Where("DATE(daily_patient_meals.date) = ?", date.Format("2006-01-02")).
 		Group("rooms.treatment_class, meal_types.name").
 		Order("rooms.treatment_class, meal_types.name").
 		Scan(&results)
@@ -165,7 +165,7 @@ func (r *dailyPatientMealRepo) CountByDateForAllRoomTypes(
 		Select("rooms.treatment_class AS treatment_class, meal_types.code AS meal_type, COUNT(daily_patient_meals.id) AS meal_count").
 		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
 		Joins("JOIN meal_types ON meal_types.id = daily_patient_meals.meal_type_id").
-		Where("DATE(daily_patient_meals.created_at) = ?", date.Format("2006-01-02")).
+		Where("DATE(daily_patient_meals.date) = ?", date.Format("2006-01-02")).
 		Group("rooms.treatment_class, meal_types.name").
 		Order("rooms.treatment_class, meal_types.name").
 		Scan(&results)
