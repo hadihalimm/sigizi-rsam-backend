@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -59,7 +60,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	session, err := config.SessionStore.Get(c.Request, "sigizi-session")
+	session, err := config.SessionStore.Get(c.Request, "sigizi-rsam")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -80,11 +81,12 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Sign in successful",
+		"data":    user,
 	})
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	session, err := config.SessionStore.Get(c.Request, "session-id")
+	session, err := config.SessionStore.Get(c.Request, "sigizi-rsam")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -103,5 +105,25 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Logged out successfully",
+	})
+}
+
+func (h *AuthHandler) CheckSession(c *gin.Context) {
+	session, err := config.SessionStore.Get(c.Request, "sigizi-rsam")
+	fmt.Println(c.Request.Cookies())
+	if err != nil || session.Values["userID"] == nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error": "Session invalid or expired",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Successfully check the session",
+		"data": gin.H{
+			"userID":   session.Values["userID"],
+			"username": session.Values["username"],
+			"role":     session.Values["role"],
+		},
 	})
 }
