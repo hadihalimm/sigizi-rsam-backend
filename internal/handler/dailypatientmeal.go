@@ -172,3 +172,25 @@ func (h *DailyPatientMealHandler) ExportToExcel(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write file to response"})
 	}
 }
+
+func (h *DailyPatientMealHandler) FilterLogsByDate(c *gin.Context) {
+	dateString := c.Query("date")
+	date, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	roomTypeUint64, _ := strconv.ParseUint(c.Query("roomType"), 10, 64)
+	roomType := uint(roomTypeUint64)
+
+	logs, err := h.dailyPatientMealService.FilterLogsByDateAndRoomType(date, roomType)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Daily patient meals log for %s retrieved successfully", dateString),
+		"data":    logs,
+	})
+}

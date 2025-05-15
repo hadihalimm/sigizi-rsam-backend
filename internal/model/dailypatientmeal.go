@@ -16,3 +16,17 @@ type DailyPatientMeal struct {
 	MealType   MealType  `json:"mealType"`
 	Diets      []Diet    `gorm:"many2many:daily_patient_meal_diets;" json:"diets"`
 }
+
+type DailyPatientMealLog struct {
+	ID                 uint      `gorm:"primaryKey" json:"id"`
+	DailyPatientMealID uint      `gorm:"not null" json:"dailyPatientMealID"`
+	RoomTypeID         uint      `gorm:"not null" json:"roomID"`
+	RoomNumber         string    `gorm:"not null" json:"roomNumber"`
+	PatientMRN         string    `gorm:"not null" json:"patientMRN"`
+	PatientName        string    `gorm:"not null" json:"patientName"`
+	Field              string    `gorm:"not null" json:"field"`
+	OldValue           string    `gorm:"type:text" json:"oldValue"`
+	NewValue           string    `gorm:"type:text" json:"newValue"`
+	ChangedAt          time.Time `gorm:"not null" json:"changedAt"`
+	Date               time.Time `gorm:"not null;index" json:"date"`
+}

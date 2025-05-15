@@ -1,10 +1,13 @@
 package repo
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hadihalimm/sigizi-rsam/internal/config"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
+	"gorm.io/gorm"
 )
 
 type DailyPatientMealRepo interface {
@@ -12,15 +15,19 @@ type DailyPatientMealRepo interface {
 	FindAll() ([]model.DailyPatientMeal, error)
 	FindByID(id uint) (*model.DailyPatientMeal, error)
 	Update(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error)
+	Updatee(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error)
 	Delete(id uint) error
 	FilterByDateAndRoomType(
 		date time.Time, roomType uint) ([]model.DailyPatientMeal, error)
 	FilterByDate(date time.Time) ([]model.DailyPatientMeal, error)
 	ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error
+	ReplaceDietss(meal *model.DailyPatientMeal, dietIDs []uint) error
 	CountByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]MealMatrixEntry, error)
 	CountByDateForAllRoomTypes(
 		date time.Time) ([]MealMatrixEntry, error)
+	FilterLogsByDateAndRoomType(
+		date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error)
 }
 
 type dailyPatientMealRepo struct {
@@ -55,7 +62,7 @@ func (r *dailyPatientMealRepo) FindAll() ([]model.DailyPatientMeal, error) {
 
 func (r *dailyPatientMealRepo) FindByID(id uint) (*model.DailyPatientMeal, error) {
 	var meal model.DailyPatientMeal
-	tx := r.db.Gorm.Preload("Diets").First(&meal, id)
+	tx := r.db.Gorm.Preload("Diets").Preload("Room").Preload("Room.RoomType").First(&meal, id)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -67,11 +74,69 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	tx = r.db.Gorm.Preload("Diets").First(&meal, meal.ID)
+	tx = r.db.Gorm.Preload("Room").Preload("Diets").First(&meal, meal.ID)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return meal, nil
+}
+
+func (r *dailyPatientMealRepo) Updatee(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error) {
+	var existingMeal model.DailyPatientMeal
+	var reloadedMeal model.DailyPatientMeal
+	err := r.db.Gorm.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Preload("Room").Preload("Patient").Preload("MealType").First(&existingMeal, meal.ID).Error; err != nil {
+			return err
+		}
+		if err := tx.Save(meal).Error; err != nil {
+			return err
+		}
+		var updatedMeal model.DailyPatientMeal
+		if err := tx.Preload("Room").Preload("Patient").Preload("MealType").First(&updatedMeal, meal.ID).Error; err != nil {
+			return err
+		}
+
+		var logs []model.DailyPatientMealLog
+		addLog := func(field string, oldVal, newVal interface{}) {
+			oldStr := fmt.Sprintf("%v", oldVal)
+			newStr := fmt.Sprintf("%v", newVal)
+			if oldStr != newStr {
+				logs = append(logs, model.DailyPatientMealLog{
+					DailyPatientMealID: updatedMeal.ID,
+					RoomTypeID:         updatedMeal.Room.RoomTypeID,
+					RoomNumber:         updatedMeal.Room.RoomNumber,
+					PatientMRN:         updatedMeal.Patient.MedicalRecordNumber,
+					PatientName:        updatedMeal.Patient.Name,
+					Field:              field,
+					OldValue:           oldStr,
+					NewValue:           newStr,
+					ChangedAt:          time.Now(),
+					Date:               updatedMeal.Date.Truncate((24 * time.Hour)),
+				})
+			}
+		}
+		addLog("RoomID", existingMeal.RoomID, meal.RoomID)
+		addLog("MealTypeID", existingMeal.MealTypeID, meal.MealTypeID)
+		if len(logs) > 0 {
+			if err := tx.Create(&logs).Error; err != nil {
+				return err
+			}
+		}
+		if err := tx.Preload("Room").
+			Preload("Room.RoomType").
+			Preload("Patient").
+			Preload("MealType").
+			Preload("Diets").
+			First(&reloadedMeal, meal.ID).Error; err != nil {
+			return err
+		}
+		meal = &reloadedMeal
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return meal, err
 }
 
 func (r *dailyPatientMealRepo) Delete(id uint) error {
@@ -98,6 +163,61 @@ func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietID
 		return tx.Error
 	}
 	return r.db.Gorm.Model(&meal).Association("Diets").Replace(diets)
+}
+
+func (r *dailyPatientMealRepo) ReplaceDietss(meal *model.DailyPatientMeal, dietIDs []uint) error {
+	return r.db.Gorm.Transaction(func(tx *gorm.DB) error {
+		var currentDiets []model.Diet
+		if err := tx.Model(meal).Association("Diets").Find(&currentDiets); err != nil {
+			return err
+		}
+
+		oldDietIDs := []string{}
+		for _, d := range currentDiets {
+			oldDietIDs = append(oldDietIDs, fmt.Sprintf("%d", d.ID))
+		}
+		oldDietStr := strings.Join(oldDietIDs, ",")
+
+		var newDiets []model.Diet
+		var newDietStr string
+
+		if len(dietIDs) == 0 {
+			if err := tx.Model(meal).Association("Diets").Clear(); err != nil {
+				return err
+			}
+			newDietStr = ""
+		} else {
+			if err := tx.Where("id IN ?", dietIDs).Find(&newDiets).Error; err != nil {
+				return err
+			}
+			if err := tx.Model(meal).Association("Diets").Replace(newDiets); err != nil {
+				return err
+			}
+			newDietIDs := []string{}
+			for _, d := range newDiets {
+				newDietIDs = append(newDietIDs, fmt.Sprintf("%d", d.ID))
+			}
+			newDietStr = strings.Join(newDietIDs, ",")
+		}
+		if oldDietStr != newDietStr {
+			log := model.DailyPatientMealLog{
+				DailyPatientMealID: meal.ID,
+				RoomTypeID:         meal.Room.RoomType.ID,
+				RoomNumber:         meal.Room.RoomNumber,
+				PatientMRN:         meal.Patient.MedicalRecordNumber,
+				PatientName:        meal.Patient.Name,
+				Field:              "Diets",
+				OldValue:           oldDietStr,
+				NewValue:           newDietStr,
+				ChangedAt:          time.Now(),
+				Date:               meal.Date.Truncate((24 * time.Hour)),
+			}
+			if err := tx.Create(&log).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *dailyPatientMealRepo) FilterByDateAndRoomType(
@@ -174,4 +294,17 @@ func (r *dailyPatientMealRepo) CountByDateForAllRoomTypes(
 		return nil, tx.Error
 	}
 	return results, nil
+}
+
+func (r *dailyPatientMealRepo) FilterLogsByDateAndRoomType(
+	date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error) {
+	var logs []model.DailyPatientMealLog
+	err := r.db.Gorm.
+		Where("DATE(date) = ?", date.Format("2006-01-02")).
+		Where("room_type_id = ? ", roomTypeID).
+		Order("changed_at DESC").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	return logs, nil
 }

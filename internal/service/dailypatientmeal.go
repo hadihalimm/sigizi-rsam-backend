@@ -24,6 +24,8 @@ type DailyPatientMealService interface {
 	CountByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]repo.MealMatrixEntry, error)
 	ExportToExcel(date time.Time) (*excelize.File, error)
+	FilterLogsByDateAndRoomType(
+		date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error)
 }
 
 type dailyPatientMealService struct {
@@ -90,15 +92,16 @@ func (s *dailyPatientMealService) Update(id uint, request request.UpdateDailyPat
 	}
 
 	meal.PatientID = request.PatientID
+	meal.Room = model.Room{}
 	meal.RoomID = request.RoomID
 	meal.MealTypeID = request.MealTypeID
 	meal.Notes = request.Notes
 
-	meal, err = s.dailyPatientMealRepo.Update(meal)
+	meal, err = s.dailyPatientMealRepo.Updatee(meal)
 	if err != nil {
 		return nil, err
 	}
-	err = s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
+	err = s.dailyPatientMealRepo.ReplaceDietss(meal, request.DietIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -189,4 +192,9 @@ func extractAllergyCodes(allergies []model.Allergy) []string {
 		names[i] = a.Code
 	}
 	return names
+}
+
+func (s *dailyPatientMealService) FilterLogsByDateAndRoomType(
+	date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error) {
+	return s.dailyPatientMealRepo.FilterLogsByDateAndRoomType(date, roomTypeID)
 }
