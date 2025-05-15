@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -70,6 +69,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 
 	session.Values["userID"] = user.ID
 	session.Values["username"] = user.Username
+	session.Values["name"] = user.Name
 	session.Values["role"] = user.Role
 	err = session.Save(c.Request, c.Writer)
 	if err != nil {
@@ -81,7 +81,12 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Sign in successful",
-		"data":    user,
+		"data": gin.H{
+			"userID":   session.Values["userID"],
+			"username": session.Values["username"],
+			"name":     session.Values["name"],
+			"role":     session.Values["role"],
+		},
 	})
 }
 
@@ -110,7 +115,6 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 
 func (h *AuthHandler) CheckSession(c *gin.Context) {
 	session, err := config.SessionStore.Get(c.Request, "sigizi-rsam")
-	fmt.Println(c.Request.Cookies())
 	if err != nil || session.Values["userID"] == nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": "Session invalid or expired",
@@ -123,6 +127,7 @@ func (h *AuthHandler) CheckSession(c *gin.Context) {
 		"data": gin.H{
 			"userID":   session.Values["userID"],
 			"username": session.Values["username"],
+			"name":     session.Values["name"],
 			"role":     session.Values["role"],
 		},
 	})
