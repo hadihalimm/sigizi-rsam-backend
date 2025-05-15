@@ -9,3 +9,7 @@ type UpdateUser struct {
 type UpdatePassword struct {
 	Password string `json:"password" validate:"required,min=8,max=32"`
 }
+
+type UpdateName struct {
+	Name string `json:"name" validate:"required,min=1,max=32"`
+}
