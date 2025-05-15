@@ -18,6 +18,7 @@ type UserService interface {
 	Delete(id uint) error
 	ResetPassword(id uint) (*model.User, error)
 	UpdatePassword(id uint, request request.UpdatePassword) (*model.User, error)
+	UpdateName(id uint, request request.UpdateName) (*model.User, error)
 }
 
 type userService struct {
@@ -74,5 +75,14 @@ func (s *userService) UpdatePassword(id uint, request request.UpdatePassword) (*
 	}
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	user.PasswordHash = string(hashedPassword)
+	return s.userRepo.Update(user)
+}
+
+func (s *userService) UpdateName(id uint, request request.UpdateName) (*model.User, error) {
+	user, err := s.userRepo.FindByID(id)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	user.Name = request.Name
 	return s.userRepo.Update(user)
 }
