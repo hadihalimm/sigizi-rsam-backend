@@ -100,8 +100,9 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	id := uint(idUint64)
+	// idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	// id := uint(idUint64)
+	id := c.GetUint("userID")
 	user, err := h.userService.UpdatePassword(id, request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -109,6 +110,26 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully update user password",
+		"data":    user,
+	})
+}
+
+func (h *UserHandler) UpdateName(c *gin.Context) {
+	var request request.UpdateName
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	// id := uint(idUint64)
+	id := c.GetUint("userID")
+	user, err := h.userService.UpdateName(id, request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Successfully update user's name",
 		"data":    user,
 	})
 }
