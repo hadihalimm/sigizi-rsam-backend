@@ -14,6 +14,7 @@ func InitSession() {
 		Path:     "/",
 		MaxAge:   int((8 * time.Hour).Seconds()),
 		HttpOnly: true,
+		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	}
 }
