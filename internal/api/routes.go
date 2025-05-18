@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -10,10 +11,10 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-		AllowHeaders:     []string{"*"},
-		ExposeHeaders:    []string{"*"},
+		AllowOrigins:     []string{os.Getenv("FRONTEND_ORIGIN")},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
 
@@ -22,9 +23,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 		auth.POST("/register", s.authHandler.Register)
 		auth.POST("/sign-in", s.authHandler.SignIn)
 		auth.POST("/logout", s.authHandler.Logout)
+		auth.GET("/check-session", s.authHandler.CheckSession)
 	}
 
 	user := r.Group("/user")
+	user.Use(s.RequireSession)
 	{
 		user.GET("", s.userHandler.GetAll)
 		user.GET("/:id", s.userHandler.GetByID)
@@ -32,9 +35,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 		user.DELETE("/:id", s.userHandler.Delete)
 		user.POST("/:id/actions/reset-password", s.userHandler.ResetPassword)
 		user.POST("/:id/actions/change-password", s.userHandler.UpdatePassword)
+		user.POST("/:id/actions/change-name", s.userHandler.UpdateName)
 	}
 
 	roomType := r.Group("/room-type")
+	roomType.Use(s.RequireSession)
 	{
 		roomType.POST("", s.roomTypeHandler.Create)
 		roomType.GET("", s.roomTypeHandler.GetAll)
@@ -44,6 +49,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	room := r.Group("/room")
+	room.Use(s.RequireSession)
 	{
 		room.POST("", s.roomHandler.Create)
 		room.GET("", s.roomHandler.GetAll)
@@ -54,6 +60,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	food := r.Group("/food")
+	food.Use(s.RequireSession)
 	{
 		food.POST("", s.foodHandler.Create)
 		food.GET("", s.foodHandler.GetAll)
@@ -63,6 +70,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	mealType := r.Group("/meal-type")
+	mealType.Use(s.RequireSession)
 	{
 		mealType.POST("", s.mealTypeHandler.Create)
 		mealType.GET("", s.mealTypeHandler.GetAll)
@@ -72,6 +80,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	mealItem := r.Group("/meal-item")
+	mealItem.Use(s.RequireSession)
 	{
 		mealItem.POST("", s.mealItemHandler.Create)
 		mealItem.GET("", s.mealItemHandler.GetAll)
@@ -81,6 +90,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	patient := r.Group("/patient")
+	patient.Use(s.RequireSession)
 	{
 		patient.POST("", s.patientHandler.Create)
 		patient.GET("", s.patientHandler.GetAll)
@@ -92,6 +102,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	dailyPatientMeal := r.Group("/daily-patient-meal")
+	dailyPatientMeal.Use(s.RequireSession)
 	{
 		dailyPatientMeal.POST("", s.dailyPatientMealHandler.Create)
 		dailyPatientMeal.GET("", s.dailyPatientMealHandler.GetAll)
@@ -101,9 +112,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 		dailyPatientMeal.GET("/filter", s.dailyPatientMealHandler.FilterByDateAndRoomType)
 		dailyPatientMeal.GET("/count", s.dailyPatientMealHandler.CountByDateAndRoomType)
 		dailyPatientMeal.GET("/export", s.dailyPatientMealHandler.ExportToExcel)
+		dailyPatientMeal.GET("/logs", s.dailyPatientMealHandler.FilterLogsByDate)
 	}
 
 	diet := r.Group("/diet")
+	diet.Use(s.RequireSession)
 	{
 		diet.POST("", s.dietHandler.Create)
 		diet.GET("", s.dietHandler.GetAll)
@@ -113,6 +126,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	allergy := r.Group("/allergy")
+	allergy.Use(s.RequireSession)
 	{
 		allergy.POST("", s.allergyHandler.Create)
 		allergy.GET("", s.allergyHandler.GetAll)
