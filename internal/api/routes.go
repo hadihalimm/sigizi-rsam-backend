@@ -111,6 +111,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		dailyPatientMeal.DELETE("/:id", s.dailyPatientMealHandler.Delete)
 		dailyPatientMeal.GET("/filter", s.dailyPatientMealHandler.FilterByDateAndRoomType)
 		dailyPatientMeal.GET("/count", s.dailyPatientMealHandler.CountByDateAndRoomType)
+		dailyPatientMeal.GET("/count/diet", s.dailyPatientMealHandler.CountDietCombinationsByDate)
 		dailyPatientMeal.GET("/export", s.dailyPatientMealHandler.ExportToExcel)
 		dailyPatientMeal.GET("/logs", s.dailyPatientMealHandler.FilterLogsByDate)
 	}
