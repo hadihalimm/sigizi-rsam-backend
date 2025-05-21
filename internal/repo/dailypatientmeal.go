@@ -2,6 +2,7 @@ package repo
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -15,13 +16,12 @@ type DailyPatientMealRepo interface {
 	FindAll() ([]model.DailyPatientMeal, error)
 	FindByID(id uint) (*model.DailyPatientMeal, error)
 	Update(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error)
-	Updatee(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error)
 	Delete(id uint) error
 	FilterByDateAndRoomType(
 		date time.Time, roomType uint) ([]model.DailyPatientMeal, error)
 	FilterByDate(date time.Time) ([]model.DailyPatientMeal, error)
+	InsertDiets(meal *model.DailyPatientMeal, dietIDs []uint) error
 	ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error
-	ReplaceDietss(meal *model.DailyPatientMeal, dietIDs []uint) error
 	CountByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]MealMatrixEntry, error)
 	CountByDateForAllRoomTypes(
@@ -70,18 +70,6 @@ func (r *dailyPatientMealRepo) FindByID(id uint) (*model.DailyPatientMeal, error
 }
 
 func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error) {
-	tx := r.db.Gorm.Save(meal)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	tx = r.db.Gorm.Preload("Room").Preload("Diets").First(&meal, meal.ID)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	return meal, nil
-}
-
-func (r *dailyPatientMealRepo) Updatee(meal *model.DailyPatientMeal) (*model.DailyPatientMeal, error) {
 	var existingMeal model.DailyPatientMeal
 	var reloadedMeal model.DailyPatientMeal
 	err := r.db.Gorm.Transaction(func(tx *gorm.DB) error {
@@ -153,7 +141,7 @@ func (r *dailyPatientMealRepo) Delete(id uint) error {
 	return tx.Error
 }
 
-func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error {
+func (r *dailyPatientMealRepo) InsertDiets(meal *model.DailyPatientMeal, dietIDs []uint) error {
 	var diets []model.Diet
 	if len(dietIDs) == 0 {
 		return r.db.Gorm.Model(&meal).Association("Diets").Clear()
@@ -165,7 +153,7 @@ func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietID
 	return r.db.Gorm.Model(&meal).Association("Diets").Replace(diets)
 }
 
-func (r *dailyPatientMealRepo) ReplaceDietss(meal *model.DailyPatientMeal, dietIDs []uint) error {
+func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietIDs []uint) error {
 	return r.db.Gorm.Transaction(func(tx *gorm.DB) error {
 		var currentDiets []model.Diet
 		if err := tx.Model(meal).Association("Diets").Find(&currentDiets); err != nil {
@@ -190,6 +178,9 @@ func (r *dailyPatientMealRepo) ReplaceDietss(meal *model.DailyPatientMeal, dietI
 			if err := tx.Where("id IN ?", dietIDs).Find(&newDiets).Error; err != nil {
 				return err
 			}
+			sort.Slice(newDiets, func(i, j int) bool {
+				return newDiets[i].ID < newDiets[j].ID
+			})
 			if err := tx.Model(meal).Association("Diets").Replace(newDiets); err != nil {
 				return err
 			}

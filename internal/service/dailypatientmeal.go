@@ -26,6 +26,8 @@ type DailyPatientMealService interface {
 	ExportToExcel(date time.Time) (*excelize.File, error)
 	FilterLogsByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error)
+	CountDietCombinationsByDate(
+		date time.Time) ([]DietCombinationCount, int, int, error)
 }
 
 type dailyPatientMealService struct {
@@ -63,7 +65,7 @@ func (s *dailyPatientMealService) Create(request request.CreateDailyPatientMeal)
 		return nil, err
 	}
 
-	err = s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
+	err = s.dailyPatientMealRepo.InsertDiets(meal, request.DietIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -97,11 +99,11 @@ func (s *dailyPatientMealService) Update(id uint, request request.UpdateDailyPat
 	meal.MealTypeID = request.MealTypeID
 	meal.Notes = request.Notes
 
-	meal, err = s.dailyPatientMealRepo.Updatee(meal)
+	meal, err = s.dailyPatientMealRepo.Update(meal)
 	if err != nil {
 		return nil, err
 	}
-	err = s.dailyPatientMealRepo.ReplaceDietss(meal, request.DietIDs)
+	err = s.dailyPatientMealRepo.ReplaceDiets(meal, request.DietIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -197,4 +199,46 @@ func extractAllergyCodes(allergies []model.Allergy) []string {
 func (s *dailyPatientMealService) FilterLogsByDateAndRoomType(
 	date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error) {
 	return s.dailyPatientMealRepo.FilterLogsByDateAndRoomType(date, roomTypeID)
+}
+
+type DietCombinationCount struct {
+	DietCodes string `json:"dietCodes"` // e.g., "DIAB-HYPO"
+	Count     int    `json:"count"`     // number of meals with this combination
+}
+
+func (s *dailyPatientMealService) CountDietCombinationsByDate(
+	date time.Time) ([]DietCombinationCount, int, int, error) {
+	meals, err := s.dailyPatientMealRepo.FilterByDate(date)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	countMap := make(map[string]int)
+	complicationCount := 0
+	nonComplicationCount := 0
+	for _, meal := range meals {
+		if len(meal.Diets) == 0 {
+			continue
+		}
+		if len(meal.Diets) == 1 {
+			nonComplicationCount++
+		} else {
+			complicationCount++
+		}
+		var keyParts []string
+		for _, diet := range meal.Diets {
+			keyParts = append(keyParts, diet.Code)
+		}
+		key := strings.Join(keyParts, "")
+		countMap[key]++
+	}
+
+	var result []DietCombinationCount
+	for key, count := range countMap {
+		result = append(result, DietCombinationCount{
+			DietCodes: key,
+			Count:     count,
+		})
+	}
+	return result, complicationCount, nonComplicationCount, nil
 }

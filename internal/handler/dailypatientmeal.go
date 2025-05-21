@@ -194,3 +194,29 @@ func (h *DailyPatientMealHandler) FilterLogsByDate(c *gin.Context) {
 		"data":    logs,
 	})
 }
+
+func (h *DailyPatientMealHandler) CountDietCombinationsByDate(c *gin.Context) {
+	dateString := c.Query("date")
+	date, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	dietCombinationsCount,
+		complicationCount,
+		nonComplicationCount,
+		err := h.dailyPatientMealService.CountDietCombinationsByDate(date)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Diet combinations count for %s retrieved successfully", dateString),
+		"data": gin.H{
+			"combinationsCount":    dietCombinationsCount,
+			"complicationCount":    complicationCount,
+			"nonComplicationCount": nonComplicationCount,
+		},
+	})
+}
