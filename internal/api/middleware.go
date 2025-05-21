@@ -18,5 +18,17 @@ func (s *Server) RequireSession(c *gin.Context) {
 
 	userID := session.Values["userID"].(uint)
 	c.Set("userID", userID)
+	c.Set("role", session.Values["role"])
+	c.Next()
+}
+
+func (s *Server) RequireAdminRole(c *gin.Context) {
+	role := c.GetString("role")
+	if role != "admin" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized",
+		})
+		return
+	}
 	c.Next()
 }
