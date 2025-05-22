@@ -1,20 +1,28 @@
 package config
 
 import (
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
-
-type ctxLoggerKeyType string
-
-const ctxLoggerKey ctxLoggerKeyType = "logger"
 
 var Logger *zap.SugaredLogger
 
 func InitLogger() {
-	logger, err := zap.NewProduction()
+	cfg := zap.NewProductionConfig()
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	logger, err := cfg.Build()
 	if err != nil {
-		panic("Failed to initialized logger: " + err.Error())
+		panic("Failed to initialize logger: " + err.Error())
 	}
-
 	Logger = logger.Sugar()
+}
+
+func WithRequestContext(logger *zap.SugaredLogger, c *gin.Context) *zap.SugaredLogger {
+	return logger.With(
+		"userID", c.GetString("userID"),
+		"ip", c.ClientIP(),
+		"path", c.FullPath(),
+		"method", c.Request.Method,
+	)
 }
