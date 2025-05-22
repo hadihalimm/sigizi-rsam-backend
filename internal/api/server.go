@@ -36,6 +36,8 @@ func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db := config.ConnectToDatabase()
 	config.InitSession()
+	config.InitLogger()
+	defer config.Logger.Sync()
 
 	// db.Gorm.Migrator().DropTable(&model.User{},
 	// 	&model.RoomType{}, &model.Room{},
