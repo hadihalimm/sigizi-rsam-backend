@@ -41,52 +41,52 @@ func (s *Server) RegisterRoutes() http.Handler {
 	roomType := r.Group("/room-type")
 	roomType.Use(s.RequireSession)
 	{
-		roomType.POST("", s.roomTypeHandler.Create)
+		roomType.POST("", s.RequireAdminRole, s.roomTypeHandler.Create)
 		roomType.GET("", s.roomTypeHandler.GetAll)
 		roomType.GET("/:id", s.roomTypeHandler.GetByID)
-		roomType.PATCH("/:id", s.roomTypeHandler.Update)
-		roomType.DELETE("/:id", s.roomTypeHandler.Delete)
+		roomType.PATCH("/:id", s.RequireAdminRole, s.roomTypeHandler.Update)
+		roomType.DELETE("/:id", s.RequireAdminRole, s.roomTypeHandler.Delete)
 	}
 
 	room := r.Group("/room")
 	room.Use(s.RequireSession)
 	{
-		room.POST("", s.roomHandler.Create)
+		room.POST("", s.RequireAdminRole, s.roomHandler.Create)
 		room.GET("", s.roomHandler.GetAll)
 		room.GET("/:id", s.roomHandler.GetByID)
-		room.PATCH("/:id", s.roomHandler.Update)
-		room.DELETE("/:id", s.roomHandler.Delete)
+		room.PATCH("/:id", s.RequireAdminRole, s.roomHandler.Update)
+		room.DELETE("/:id", s.RequireAdminRole, s.roomHandler.Delete)
 		room.GET("/filter", s.roomHandler.FilterByRoomType)
 	}
 
 	food := r.Group("/food")
 	food.Use(s.RequireSession)
 	{
-		food.POST("", s.foodHandler.Create)
+		food.POST("", s.RequireAdminRole, s.foodHandler.Create)
 		food.GET("", s.foodHandler.GetAll)
 		food.GET("/:id", s.foodHandler.GetByID)
-		food.PATCH("/:id", s.foodHandler.Update)
-		food.DELETE("/:id", s.foodHandler.Delete)
+		food.PATCH("/:id", s.RequireAdminRole, s.foodHandler.Update)
+		food.DELETE("/:id", s.RequireAdminRole, s.foodHandler.Delete)
 	}
 
 	mealType := r.Group("/meal-type")
 	mealType.Use(s.RequireSession)
 	{
-		mealType.POST("", s.mealTypeHandler.Create)
+		mealType.POST("", s.RequireAdminRole, s.mealTypeHandler.Create)
 		mealType.GET("", s.mealTypeHandler.GetAll)
 		mealType.GET("/:id", s.mealTypeHandler.GetByID)
-		mealType.PATCH("/:id", s.mealTypeHandler.Update)
-		mealType.DELETE("/:id", s.mealTypeHandler.Delete)
+		mealType.PATCH("/:id", s.RequireAdminRole, s.mealTypeHandler.Update)
+		mealType.DELETE("/:id", s.RequireAdminRole, s.mealTypeHandler.Delete)
 	}
 
 	mealItem := r.Group("/meal-item")
 	mealItem.Use(s.RequireSession)
 	{
-		mealItem.POST("", s.mealItemHandler.Create)
+		mealItem.POST("", s.RequireAdminRole, s.mealItemHandler.Create)
 		mealItem.GET("", s.mealItemHandler.GetAll)
 		mealItem.GET("/:id", s.mealItemHandler.GetByID)
-		mealItem.PATCH("/:id", s.mealItemHandler.Update)
-		mealItem.DELETE("/:id", s.mealItemHandler.Delete)
+		mealItem.PATCH("/:id", s.RequireAdminRole, s.mealItemHandler.Update)
+		mealItem.DELETE("/:id", s.RequireAdminRole, s.mealItemHandler.Delete)
 	}
 
 	patient := r.Group("/patient")
@@ -119,21 +119,21 @@ func (s *Server) RegisterRoutes() http.Handler {
 	diet := r.Group("/diet")
 	diet.Use(s.RequireSession)
 	{
-		diet.POST("", s.dietHandler.Create)
+		diet.POST("", s.RequireAdminRole, s.dietHandler.Create)
 		diet.GET("", s.dietHandler.GetAll)
 		diet.GET("/:id", s.dietHandler.GetByID)
-		diet.PATCH("/:id", s.dietHandler.Update)
-		diet.DELETE("/:id", s.dietHandler.Delete)
+		diet.PATCH("/:id", s.RequireAdminRole, s.dietHandler.Update)
+		diet.DELETE("/:id", s.RequireAdminRole, s.dietHandler.Delete)
 	}
 
 	allergy := r.Group("/allergy")
 	allergy.Use(s.RequireSession)
 	{
-		allergy.POST("", s.allergyHandler.Create)
+		allergy.POST("", s.RequireAdminRole, s.allergyHandler.Create)
 		allergy.GET("", s.allergyHandler.GetAll)
 		allergy.GET("/:id", s.allergyHandler.GetByID)
-		allergy.PATCH("/:id", s.allergyHandler.Update)
-		allergy.DELETE("/:id", s.allergyHandler.Delete)
+		allergy.PATCH("/:id", s.RequireAdminRole, s.allergyHandler.Update)
+		allergy.DELETE("/:id", s.RequireAdminRole, s.allergyHandler.Delete)
 	}
 
 	return r
