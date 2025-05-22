@@ -35,6 +35,7 @@ type Server struct {
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db := config.ConnectToDatabase()
+	config.InitSession()
 
 	// db.Gorm.Migrator().DropTable(&model.User{},
 	// 	&model.RoomType{}, &model.Room{},
