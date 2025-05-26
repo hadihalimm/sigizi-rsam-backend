@@ -53,11 +53,12 @@ func (s *dailyPatientMealService) Create(request request.CreateDailyPatientMeal)
 	}
 
 	newDailyMeal := &model.DailyPatientMeal{
-		PatientID:  request.PatientID,
-		RoomID:     request.RoomID,
-		MealTypeID: request.MealTypeID,
-		Date:       request.Date.Truncate((24 * time.Hour)),
-		Notes:      request.Notes,
+		PatientID:       request.PatientID,
+		RoomID:          request.RoomID,
+		MealTypeID:      request.MealTypeID,
+		Date:            request.Date.Truncate((24 * time.Hour)),
+		Notes:           request.Notes,
+		IsNewlyAdmitted: request.IsNewlyAdmitted,
 	}
 
 	meal, err := s.dailyPatientMealRepo.Create(newDailyMeal)
@@ -98,6 +99,7 @@ func (s *dailyPatientMealService) Update(id uint, request request.UpdateDailyPat
 	meal.RoomID = request.RoomID
 	meal.MealTypeID = request.MealTypeID
 	meal.Notes = request.Notes
+	meal.IsNewlyAdmitted = request.IsNewlyAdmitted
 
 	meal, err = s.dailyPatientMealRepo.Update(meal)
 	if err != nil {
@@ -168,7 +170,7 @@ func (s *dailyPatientMealService) ExportToExcel(date time.Time) (*excelize.File,
 		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), m.ID)
 		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), m.Patient.Name)
 		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), m.Patient.MedicalRecordNumber)
-		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), m.Patient.DateOfBirth.Format("2006-01-02"))
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), m.Patient.DateOfBirth.Format("02-01-2006"))
 		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), m.Room.RoomNumber)
 		f.SetCellValue(sheet, fmt.Sprintf("F%d", row), fmt.Sprintf("%s%s %s", m.MealType.Code,
 			strings.Join(extractDietCodes(m.Diets), ""),
