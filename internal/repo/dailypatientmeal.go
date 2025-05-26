@@ -105,6 +105,7 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 		}
 		addLog("RoomID", existingMeal.RoomID, meal.RoomID)
 		addLog("MealTypeID", existingMeal.MealTypeID, meal.MealTypeID)
+		addLog("Notes", existingMeal.Notes, meal.Notes)
 		if len(logs) > 0 {
 			if err := tx.Create(&logs).Error; err != nil {
 				return err
