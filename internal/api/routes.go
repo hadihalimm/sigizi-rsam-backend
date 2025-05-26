@@ -17,8 +17,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
+	api := r.Group("/api/v1")
 
-	auth := r.Group("/auth")
+	auth := api.Group("/auth")
 	{
 		auth.POST("/register", s.authHandler.Register)
 		auth.POST("/sign-in", s.authHandler.SignIn)
@@ -26,7 +27,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		auth.GET("/check-session", s.authHandler.CheckSession)
 	}
 
-	user := r.Group("/user")
+	user := api.Group("/user")
 	user.Use(s.RequireSession)
 	{
 		user.GET("", s.userHandler.GetAll)
@@ -38,7 +39,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		user.POST("/:id/actions/change-name", s.userHandler.UpdateName)
 	}
 
-	roomType := r.Group("/room-type")
+	roomType := api.Group("/room-type")
 	roomType.Use(s.RequireSession)
 	{
 		roomType.POST("", s.RequireAdminRole, s.roomTypeHandler.Create)
@@ -48,7 +49,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		roomType.DELETE("/:id", s.RequireAdminRole, s.roomTypeHandler.Delete)
 	}
 
-	room := r.Group("/room")
+	room := api.Group("/room")
 	room.Use(s.RequireSession)
 	{
 		room.POST("", s.RequireAdminRole, s.roomHandler.Create)
@@ -59,7 +60,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		room.GET("/filter", s.roomHandler.FilterByRoomType)
 	}
 
-	food := r.Group("/food")
+	food := api.Group("/food")
 	food.Use(s.RequireSession)
 	{
 		food.POST("", s.RequireAdminRole, s.foodHandler.Create)
@@ -69,7 +70,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		food.DELETE("/:id", s.RequireAdminRole, s.foodHandler.Delete)
 	}
 
-	mealType := r.Group("/meal-type")
+	mealType := api.Group("/meal-type")
 	mealType.Use(s.RequireSession)
 	{
 		mealType.POST("", s.RequireAdminRole, s.mealTypeHandler.Create)
@@ -79,7 +80,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		mealType.DELETE("/:id", s.RequireAdminRole, s.mealTypeHandler.Delete)
 	}
 
-	mealItem := r.Group("/meal-item")
+	mealItem := api.Group("/meal-item")
 	mealItem.Use(s.RequireSession)
 	{
 		mealItem.POST("", s.RequireAdminRole, s.mealItemHandler.Create)
@@ -89,7 +90,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		mealItem.DELETE("/:id", s.RequireAdminRole, s.mealItemHandler.Delete)
 	}
 
-	patient := r.Group("/patient")
+	patient := api.Group("/patient")
 	patient.Use(s.RequireSession)
 	{
 		patient.POST("", s.patientHandler.Create)
@@ -101,7 +102,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		patient.GET("/paginated", s.patientHandler.GetAllWithPaginationAndKeyword)
 	}
 
-	dailyPatientMeal := r.Group("/daily-patient-meal")
+	dailyPatientMeal := api.Group("/daily-patient-meal")
 	dailyPatientMeal.Use(s.RequireSession)
 	{
 		dailyPatientMeal.POST("", s.dailyPatientMealHandler.Create)
@@ -116,7 +117,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		dailyPatientMeal.GET("/logs", s.dailyPatientMealHandler.FilterLogsByDate)
 	}
 
-	diet := r.Group("/diet")
+	diet := api.Group("/diet")
 	diet.Use(s.RequireSession)
 	{
 		diet.POST("", s.RequireAdminRole, s.dietHandler.Create)
@@ -126,7 +127,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		diet.DELETE("/:id", s.RequireAdminRole, s.dietHandler.Delete)
 	}
 
-	allergy := r.Group("/allergy")
+	allergy := api.Group("/allergy")
 	allergy.Use(s.RequireSession)
 	{
 		allergy.POST("", s.RequireAdminRole, s.allergyHandler.Create)
