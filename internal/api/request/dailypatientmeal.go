@@ -9,6 +9,7 @@ type CreateDailyPatientMeal struct {
 	Date            time.Time `json:"date" binding:"required" validate:"required"`
 	Notes           string    `json:"notes"`
 	DietIDs         []uint    `json:"dietIDs"`
+	AllergyIDs      []uint    `json:"allergyIDs"`
 	IsNewlyAdmitted bool      `json:"isNewlyAdmitted"`
 }
 
