@@ -80,7 +80,7 @@ func (r *patientRepo) Delete(id uint) error {
 
 func (r *patientRepo) FilterByMRN(mrn string) (*model.Patient, error) {
 	var patient model.Patient
-	tx := r.db.Gorm.Where("medical_record_number = ?", mrn).First(&patient)
+	tx := r.db.Gorm.Preload("Allergies").Where("medical_record_number = ?", mrn).First(&patient)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
