@@ -13,7 +13,7 @@ type Room struct {
 	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
-type RSAMRoom struct {
+type SIMRSRoom struct {
 	Code           string `json:"kode"`
 	Name           string `json:"nama_kamar"`
 	ClassID        string `json:"kelas_id"`
