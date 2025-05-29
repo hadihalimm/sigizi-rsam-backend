@@ -171,7 +171,7 @@ func (s *dailyPatientMealService) ExportToExcel(date time.Time) (*excelize.File,
 		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), m.Patient.Name)
 		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), m.Patient.MedicalRecordNumber)
 		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), m.Patient.DateOfBirth.Format("02-01-2006"))
-		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), m.Room.RoomNumber)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), m.Room.Name)
 		f.SetCellValue(sheet, fmt.Sprintf("F%d", row), fmt.Sprintf("%s%s %s", m.MealType.Code,
 			strings.Join(extractDietCodes(m.Diets), ""),
 			strings.Join(extractAllergyCodes(m.Patient.Allergies), "")))

@@ -92,7 +92,7 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 				logs = append(logs, model.DailyPatientMealLog{
 					DailyPatientMealID: updatedMeal.ID,
 					RoomTypeID:         updatedMeal.Room.RoomTypeID,
-					RoomNumber:         updatedMeal.Room.RoomNumber,
+					RoomName:           updatedMeal.Room.Name,
 					PatientMRN:         updatedMeal.Patient.MedicalRecordNumber,
 					PatientName:        updatedMeal.Patient.Name,
 					Field:              field,
@@ -195,7 +195,7 @@ func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietID
 			log := model.DailyPatientMealLog{
 				DailyPatientMealID: meal.ID,
 				RoomTypeID:         meal.Room.RoomType.ID,
-				RoomNumber:         meal.Room.RoomNumber,
+				RoomName:           meal.Room.Name,
 				PatientMRN:         meal.Patient.MedicalRecordNumber,
 				PatientName:        meal.Patient.Name,
 				Field:              "Diets",

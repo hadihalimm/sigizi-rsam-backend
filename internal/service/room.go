@@ -40,7 +40,7 @@ func (s *roomService) Create(request request.CreateRoom) (*model.Room, error) {
 	}
 
 	newRoom := &model.Room{
-		RoomNumber:     request.RoomNumber,
+		Name:           request.Name,
 		TreatmentClass: request.TreatmentClass,
 		RoomTypeID:     request.RoomTypeID,
 	}
@@ -66,7 +66,7 @@ func (s *roomService) Update(id uint, request request.UpdateRoom) (*model.Room, 
 		return nil, err
 	}
 
-	room.RoomNumber = request.RoomNumber
+	room.Name = request.Name
 	room.TreatmentClass = request.TreatmentClass
 	room.RoomTypeID = request.RoomTypeID
 
