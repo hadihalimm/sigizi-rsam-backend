@@ -9,6 +9,7 @@ type RoomRepo interface {
 	Create(room *model.Room) (*model.Room, error)
 	FindAll() ([]model.Room, error)
 	FindByID(id uint) (*model.Room, error)
+	FindByCode(code string) (*model.Room, error)
 	Update(room *model.Room) (*model.Room, error)
 	Delete(id uint) error
 	FilterByRoomType(roomTypeID uint) ([]model.Room, error)
@@ -47,6 +48,15 @@ func (r *roomRepo) FindAll() ([]model.Room, error) {
 func (r *roomRepo) FindByID(id uint) (*model.Room, error) {
 	var room model.Room
 	tx := r.db.Gorm.Preload("RoomType").First(&room, id)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &room, nil
+}
+
+func (r *roomRepo) FindByCode(code string) (*model.Room, error) {
+	var room model.Room
+	tx := r.db.Gorm.Preload("RoomType").Where("code = ?", code).First(&room)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
