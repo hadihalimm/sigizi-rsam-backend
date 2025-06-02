@@ -1,12 +1,15 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
 	"github.com/hadihalimm/sigizi-rsam/internal/repo"
+	"gorm.io/gorm"
 )
 
 type RoomService interface {
@@ -83,4 +86,26 @@ func (s *roomService) FilterByRoomType(roomTypeID uint) ([]model.Room, error) {
 		return nil, errors.New("RoomType not found")
 	}
 	return s.roomRepo.FilterByRoomType(roomTypeID)
+}
+
+func (s *roomService) SyncFromSIMRS() error {
+	response, err := http.Get("/tes")
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	var result []model.SIMRSRoom
+	err = json.NewDecoder(response.Body).Decode(&result)
+
+	for _, room := range result {
+		existingRoomType, err := s.roomRepo.FindByCode(room.Code)
+		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+			request := request.CreateRoom{Code: room.Code, Name: room.Name, TreatmentClass: room.TreatmentClass}
+			_, err = s.Create(request)
+		} else {
+			request := request.UpdateRoom{Code: room.Code, Name: room.Name, TreatmentClass: room.TreatmentClass}
+			_, err = s.Update(existingRoomType.ID, request)
+		}
+	}
+	return err
 }
