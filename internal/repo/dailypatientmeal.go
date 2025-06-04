@@ -73,14 +73,20 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 	var existingMeal model.DailyPatientMeal
 	var reloadedMeal model.DailyPatientMeal
 	err := r.db.Gorm.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Preload("Room").Preload("Patient").Preload("MealType").First(&existingMeal, meal.ID).Error; err != nil {
+		if err := tx.Preload("Room").
+			Preload("Patient").
+			Preload("MealType").
+			First(&existingMeal, meal.ID).Error; err != nil {
 			return err
 		}
 		if err := tx.Save(meal).Error; err != nil {
 			return err
 		}
 		var updatedMeal model.DailyPatientMeal
-		if err := tx.Preload("Room").Preload("Patient").Preload("MealType").First(&updatedMeal, meal.ID).Error; err != nil {
+		if err := tx.Preload("Room").
+			Preload("Patient").
+			Preload("MealType").
+			First(&updatedMeal, meal.ID).Error; err != nil {
 			return err
 		}
 
@@ -103,6 +109,7 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 				})
 			}
 		}
+		addLog("RoomType", existingMeal.Room.RoomTypeID, updatedMeal.Room.RoomTypeID)
 		addLog("RoomID", existingMeal.RoomID, meal.RoomID)
 		addLog("MealTypeID", existingMeal.MealTypeID, meal.MealTypeID)
 		addLog("Notes", existingMeal.Notes, meal.Notes)
