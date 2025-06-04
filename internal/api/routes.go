@@ -2,21 +2,19 @@ package api
 
 import (
 	"net/http"
-	"os"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := gin.Default()
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{os.Getenv("FRONTEND_ORIGIN")},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"*"},
+	// 	AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+	// 	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// }))
 	api := r.Group("/api/v1")
 
 	auth := api.Group("/auth")
@@ -154,23 +152,23 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 		mealItem := admin.Group("/meal-item")
 		{
-			mealItem.POST("", s.RequireAdminRole, s.mealItemHandler.Create)
-			mealItem.PATCH("/:id", s.RequireAdminRole, s.mealItemHandler.Update)
-			mealItem.DELETE("/:id", s.RequireAdminRole, s.mealItemHandler.Delete)
+			mealItem.POST("", s.mealItemHandler.Create)
+			mealItem.PATCH("/:id", s.mealItemHandler.Update)
+			mealItem.DELETE("/:id", s.mealItemHandler.Delete)
 		}
 
 		diet := admin.Group("/diet")
 		{
-			diet.POST("", s.RequireAdminRole, s.dietHandler.Create)
-			diet.PATCH("/:id", s.RequireAdminRole, s.dietHandler.Update)
-			diet.DELETE("/:id", s.RequireAdminRole, s.dietHandler.Delete)
+			diet.POST("", s.dietHandler.Create)
+			diet.PATCH("/:id", s.dietHandler.Update)
+			diet.DELETE("/:id", s.dietHandler.Delete)
 		}
 
 		allergy := admin.Group("/allergy")
 		{
-			allergy.POST("", s.RequireAdminRole, s.allergyHandler.Create)
-			allergy.PATCH("/:id", s.RequireAdminRole, s.allergyHandler.Update)
-			allergy.DELETE("/:id", s.RequireAdminRole, s.allergyHandler.Delete)
+			allergy.POST("", s.allergyHandler.Create)
+			allergy.PATCH("/:id", s.allergyHandler.Update)
+			allergy.DELETE("/:id", s.allergyHandler.Delete)
 		}
 	}
 
