@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -19,6 +20,7 @@ type RoomService interface {
 	Update(id uint, request request.UpdateRoom) (*model.Room, error)
 	Delete(id uint) error
 	FilterByRoomType(roomTypeID uint) ([]model.Room, error)
+	SyncFromSIMRS(token *string, roomTypeID uint, roomTypeCode string) error
 }
 
 type roomService struct {
@@ -43,7 +45,9 @@ func (s *roomService) Create(request request.CreateRoom) (*model.Room, error) {
 	}
 
 	newRoom := &model.Room{
+		Code:           request.Code,
 		Name:           request.Name,
+		ClassID:        request.ClassID,
 		TreatmentClass: request.TreatmentClass,
 		RoomTypeID:     request.RoomTypeID,
 	}
@@ -88,23 +92,58 @@ func (s *roomService) FilterByRoomType(roomTypeID uint) ([]model.Room, error) {
 	return s.roomRepo.FilterByRoomType(roomTypeID)
 }
 
-func (s *roomService) SyncFromSIMRS() error {
-	response, err := http.Get("/tes")
+func (s *roomService) SyncFromSIMRS(token *string, roomTypeID uint, roomTypeCode string) error {
+	req, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("http://192.168.2.20/wssimrs/index.php/simrs/referensi/kamar/%s", roomTypeCode), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("X-Token", *token)
+	client := &http.Client{}
+	response, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
-	var result []model.SIMRSRoom
+
+	type SIMRSKamarItem struct {
+		Kode         string `json:"kode"`
+		Nama         string `json:"nama_kamar"`
+		KelasID      string `json:"kelas_id"`
+		KelasLayanan string `json:"kelas_layanan"`
+	}
+
+	type SIMRSKamarResponse struct {
+		Metadata struct {
+			Code    int    `json:"code"`
+			Message string `json:"message"`
+		} `json:"metadata"`
+		Response []SIMRSKamarItem `json:"response"`
+	}
+
+	var result SIMRSKamarResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
 
-	for _, room := range result {
-		existingRoomType, err := s.roomRepo.FindByCode(room.Code)
+	for _, kamar := range result.Response {
+		existingRoom, err := s.roomRepo.FindByCode(kamar.Kode)
+		fmt.Println(errors.Is(err, gorm.ErrRecordNotFound))
 		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-			request := request.CreateRoom{Code: room.Code, Name: room.Name, TreatmentClass: room.TreatmentClass}
+			request := request.CreateRoom{
+				Code:           kamar.Kode,
+				Name:           kamar.Nama,
+				ClassID:        kamar.KelasID,
+				TreatmentClass: kamar.KelasLayanan,
+				RoomTypeID:     roomTypeID}
 			_, err = s.Create(request)
 		} else {
-			request := request.UpdateRoom{Code: room.Code, Name: room.Name, TreatmentClass: room.TreatmentClass}
-			_, err = s.Update(existingRoomType.ID, request)
+			request := request.UpdateRoom{
+				Code:           kamar.Kode,
+				Name:           kamar.Nama,
+				ClassID:        kamar.KelasID,
+				TreatmentClass: kamar.KelasLayanan,
+				RoomTypeID:     roomTypeID}
+			_, err = s.Update(existingRoom.ID, request)
 		}
 	}
 	return err

@@ -11,10 +11,11 @@ import (
 
 type RoomTypeHandler struct {
 	roomTypeService service.RoomTypeService
+	roomService     service.RoomService
 }
 
-func NewRoomTypeHandler(roomTypeService service.RoomTypeService) *RoomTypeHandler {
-	return &RoomTypeHandler{roomTypeService: roomTypeService}
+func NewRoomTypeHandler(roomTypeService service.RoomTypeService, roomService service.RoomService) *RoomTypeHandler {
+	return &RoomTypeHandler{roomTypeService: roomTypeService, roomService: roomService}
 }
 
 func (h *RoomTypeHandler) Create(c *gin.Context) {
@@ -95,5 +96,29 @@ func (h *RoomTypeHandler) Delete(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Room type deleted successfully",
+	})
+}
+
+func (h *RoomTypeHandler) SyncFromSIMRS(c *gin.Context) {
+	token, err := h.roomTypeService.GetSIMRSToken()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	roomTypes, err := h.roomTypeService.SyncFromSIMRS(token)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, rt := range roomTypes {
+		err = h.roomService.SyncFromSIMRS(token, rt.ID, rt.Code)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Room type has been synchronized successfully",
 	})
 }

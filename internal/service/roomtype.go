@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"os"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
@@ -18,6 +19,8 @@ type RoomTypeService interface {
 	GetByID(id uint) (*model.RoomType, error)
 	Update(id uint, request request.UpdateRoomType) (*model.RoomType, error)
 	Delete(id uint) error
+	GetSIMRSToken() (*string, error)
+	SyncFromSIMRS(token *string) ([]model.RoomType, error)
 }
 
 type roomTypeService struct {
@@ -65,24 +68,73 @@ func (s *roomTypeService) Delete(id uint) error {
 	return s.roomTypeRepo.Delete(id)
 }
 
-func (s *roomTypeService) SyncFromSIMRS() error {
-	response, err := http.Get("/tes")
+type TokenResponse struct {
+	Metadata struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	} `json:"metadata"`
+	Response struct {
+		Token string `json:"token"`
+	} `json:"response"`
+}
+
+func (s *roomTypeService) GetSIMRSToken() (*string, error) {
+	req, err := http.NewRequest("GET", "http://192.168.2.20/wssimrs/index.php/auth/token", nil)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	req.Header.Set("X-Username", os.Getenv("SIMRS_USERNAME"))
+	req.Header.Set("X-Password", os.Getenv("SIMRS_PASSWORD"))
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
 	}
 	defer response.Body.Close()
-	var result []model.SIMRSRoomType
+	var tokenResponse TokenResponse
+	err = json.NewDecoder(response.Body).Decode(&tokenResponse)
+	return &tokenResponse.Response.Token, nil
+}
+
+func (s *roomTypeService) SyncFromSIMRS(token *string) ([]model.RoomType, error) {
+
+	req, err := http.NewRequest("GET", "http://192.168.2.20/wssimrs/index.php/simrs/referensi/bangsal", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("X-Token", *token)
+	client := &http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	type SIMRSBangsalItem struct {
+		Kode  string `json:"kode"`
+		Ruang string `json:"ruang"`
+	}
+
+	type SIMRSBangsalResponse struct {
+		Metadata struct {
+			Code    int    `json:"code"`
+			Message string `json:"message"`
+		} `json:"metadata"`
+		Response []SIMRSBangsalItem `json:"response"`
+	}
+
+	var result SIMRSBangsalResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
 
-	for _, rt := range result {
-		existingRoomType, err := s.roomTypeRepo.FindByCode(rt.Code)
+	for _, rt := range result.Response {
+		existingRoomType, err := s.roomTypeRepo.FindByCode(rt.Kode)
 		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-			request := request.CreateRoomType{Code: rt.Code, Name: rt.Name}
+			request := request.CreateRoomType{Code: rt.Kode, Name: rt.Ruang}
 			_, err = s.Create(request)
 		} else {
-			request := request.UpdateRoomType{Code: rt.Code, Name: rt.Name}
+			request := request.UpdateRoomType{Code: rt.Kode, Name: rt.Ruang}
 			_, err = s.Update(existingRoomType.ID, request)
 		}
 	}
-	return err
+	return s.roomTypeRepo.FindAll()
 }
