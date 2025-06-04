@@ -8,8 +8,8 @@ import (
 
 func main() {
 	server := api.NewServer()
-	err := server.ListenAndServeTLS("cert.crt", "key.key")
-	// err := server.ListenAndServe()
+	// err := server.ListenAndServeTLS("cert.crt", "key.key")
+	err := server.ListenAndServe()
 	if err != nil {
 		panic(fmt.Sprintf("Cannot start server: %s", err))
 	}
