@@ -6,7 +6,7 @@ type Room struct {
 	ID             uint      `gorm:"primaryKey" json:"id"`
 	Code           string    `gorm:"unique;not null" json:"code"`
 	Name           string    `gorm:"not null" json:"name"`
-	ClassID        string    `gorm:"not null" json:"treatment_class_id"`
+	ClassID        string    `gorm:"not null" json:"treatmentClassID"`
 	TreatmentClass string    `gorm:"not null" json:"treatmentClass"`
 	RoomTypeID     uint      `gorm:"not null;index" json:"roomTypeID"`
 	RoomType       RoomType  `json:"roomType"`
