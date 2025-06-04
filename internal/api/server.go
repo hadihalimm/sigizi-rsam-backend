@@ -43,7 +43,7 @@ func NewServer() *http.Server {
 	// 	&model.RoomType{}, &model.Room{},
 	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
 	// 	&model.Patient{}, &model.DailyPatientMeal{})
-	// db.Gorm.Migrator().DropTable(&model.DailyPatientMeal{})
+	// db.Gorm.Migrator().DropTable(&model.RoomType{}, &model.Room{})
 
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
@@ -61,10 +61,10 @@ func NewServer() *http.Server {
 
 	roomTypeRepo := repo.NewRoomTypeRepo(db)
 	roomTypeService := service.NewRoomTypeService(roomTypeRepo, validator)
-	roomTypeHandler := handler.NewRoomTypeHandler(roomTypeService)
 
 	roomRepo := repo.NewRoomRepo(db)
 	roomService := service.NewRoomService(roomRepo, roomTypeRepo, validator)
+	roomTypeHandler := handler.NewRoomTypeHandler(roomTypeService, roomService)
 	roomHandler := handler.NewRoomHandler(roomService)
 
 	foodRepo := repo.NewFoodRepo(db)
