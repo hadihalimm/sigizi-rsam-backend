@@ -159,7 +159,7 @@ func (s *dailyPatientMealService) ExportToExcel(date time.Time) (*excelize.File,
 	sheet := "Permintaan Makanan"
 	f.NewSheet(sheet)
 
-	headers := []string{"ID", "Nama Pasien", "No. MR", "Tanggal Lahir", "Tipe Kamar", "Diet", "Catatan"}
+	headers := []string{"ID", "Nama Pasien", "No. MR", "Tanggal Lahir", "Kamar", "Diet", "Catatan"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		f.SetCellValue(sheet, cell, h)
@@ -171,11 +171,19 @@ func (s *dailyPatientMealService) ExportToExcel(date time.Time) (*excelize.File,
 		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), m.Patient.Name)
 		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), m.Patient.MedicalRecordNumber)
 		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), m.Patient.DateOfBirth.Format("02-01-2006"))
-		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), m.Room.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), fmt.Sprintf("%s - %s", m.Room.RoomType.Name, m.Room.Name))
 		f.SetCellValue(sheet, fmt.Sprintf("F%d", row), fmt.Sprintf("%s%s %s", m.MealType.Code,
 			strings.Join(extractDietCodes(m.Diets), ""),
 			strings.Join(extractAllergyCodes(m.Patient.Allergies), "")))
 		f.SetCellValue(sheet, fmt.Sprintf("G%d", row), m.Notes)
+
+		f.SetColWidth(sheet, "A", "A", 5)
+		f.SetColWidth(sheet, "B", "B", 20)
+		f.SetColWidth(sheet, "C", "C", 10)
+		f.SetColWidth(sheet, "D", "D", 12)
+		f.SetColWidth(sheet, "E", "E", 20)
+		f.SetColWidth(sheet, "F", "F", 30)
+		f.SetColWidth(sheet, "G", "G", 20)
 	}
 
 	f.DeleteSheet("Sheet1")
