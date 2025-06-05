@@ -180,10 +180,10 @@ func (h *DailyPatientMealHandler) FilterLogsByDate(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	roomTypeUint64, _ := strconv.ParseUint(c.Query("roomType"), 10, 64)
-	roomType := uint(roomTypeUint64)
+	// roomTypeUint64, _ := strconv.ParseUint(c.Query("roomType"), 10, 64)
+	// roomType := uint(roomTypeUint64)
 
-	logs, err := h.dailyPatientMealService.FilterLogsByDateAndRoomType(date, roomType)
+	logs, err := h.dailyPatientMealService.FilterLogsByDate(date)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

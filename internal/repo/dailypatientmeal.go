@@ -26,6 +26,7 @@ type DailyPatientMealRepo interface {
 		date time.Time, roomTypeID uint) ([]MealMatrixEntry, error)
 	CountByDateForAllRoomTypes(
 		date time.Time) ([]MealMatrixEntry, error)
+	FilterLogsByDate(date time.Time) ([]model.DailyPatientMealLog, error)
 	FilterLogsByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error)
 }
@@ -293,6 +294,17 @@ func (r *dailyPatientMealRepo) CountByDateForAllRoomTypes(
 		return nil, tx.Error
 	}
 	return results, nil
+}
+
+func (r *dailyPatientMealRepo) FilterLogsByDate(date time.Time) ([]model.DailyPatientMealLog, error) {
+	var logs []model.DailyPatientMealLog
+	err := r.db.Gorm.
+		Where("DATE(date) = ?", date.Format("2006-01-02")).
+		Order("changed_at DESC").Find(&logs).Error
+	if err != nil {
+		return nil, err
+	}
+	return logs, nil
 }
 
 func (r *dailyPatientMealRepo) FilterLogsByDateAndRoomType(

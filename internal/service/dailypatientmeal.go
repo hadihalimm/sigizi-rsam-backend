@@ -24,6 +24,7 @@ type DailyPatientMealService interface {
 	CountByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]repo.MealMatrixEntry, error)
 	ExportToExcel(date time.Time) (*excelize.File, error)
+	FilterLogsByDate(date time.Time) ([]model.DailyPatientMealLog, error)
 	FilterLogsByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error)
 	CountDietCombinationsByDate(
@@ -209,6 +210,10 @@ func extractAllergyCodes(allergies []model.Allergy) []string {
 func (s *dailyPatientMealService) FilterLogsByDateAndRoomType(
 	date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error) {
 	return s.dailyPatientMealRepo.FilterLogsByDateAndRoomType(date, roomTypeID)
+}
+
+func (s *dailyPatientMealService) FilterLogsByDate(date time.Time) ([]model.DailyPatientMealLog, error) {
+	return s.dailyPatientMealRepo.FilterLogsByDate(date)
 }
 
 type DietCombinationCount struct {
