@@ -111,7 +111,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	}
 
 	admin := api.Group("/admin")
-	// admin.Use(s.RequireAdminRole)
+	admin.Use(s.RequireSession, s.RequireAdminRole)
 	{
 		user := admin.Group("/user")
 		{
