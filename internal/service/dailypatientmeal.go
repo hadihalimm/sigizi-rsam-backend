@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -169,7 +170,8 @@ func (s *dailyPatientMealService) ExportToExcel(date time.Time) (*excelize.File,
 	for i, m := range meals {
 		row := i + 2
 		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), m.ID)
-		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), m.Patient.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", row),
+			regexp.MustCompile(`(^|[\s.])\w`).ReplaceAllStringFunc(m.Patient.Name, strings.ToUpper))
 		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), m.Patient.MedicalRecordNumber)
 		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), m.Patient.DateOfBirth.Format("02-01-2006"))
 		f.SetCellValue(sheet, fmt.Sprintf("E%d", row), fmt.Sprintf("%s - %s", m.Room.RoomType.Name, m.Room.Name))
