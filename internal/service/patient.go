@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -73,7 +74,7 @@ func (s *patientService) Update(id uint, request request.UpdatePatient) (*model.
 		return nil, errors.New("patient not found")
 	}
 
-	patient.Name = request.Name
+	patient.Name = strings.ToLower(request.Name)
 	patient.MedicalRecordNumber = request.MedicalRecordNumber
 	patient.DateOfBirth = request.DateOfBirth
 
