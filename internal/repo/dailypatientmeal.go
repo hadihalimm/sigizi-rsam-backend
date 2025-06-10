@@ -77,6 +77,7 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 		if err := tx.Preload("Room").
 			Preload("Patient").
 			Preload("MealType").
+			Preload("Room.RoomType").
 			First(&existingMeal, meal.ID).Error; err != nil {
 			return err
 		}
@@ -87,6 +88,7 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 		if err := tx.Preload("Room").
 			Preload("Patient").
 			Preload("MealType").
+			Preload("Room.RoomType").
 			First(&updatedMeal, meal.ID).Error; err != nil {
 			return err
 		}
@@ -98,7 +100,7 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 			if oldStr != newStr {
 				logs = append(logs, model.DailyPatientMealLog{
 					DailyPatientMealID: updatedMeal.ID,
-					RoomTypeID:         updatedMeal.Room.RoomTypeID,
+					RoomTypeName:       updatedMeal.Room.RoomType.Name,
 					RoomName:           updatedMeal.Room.Name,
 					PatientMRN:         updatedMeal.Patient.MedicalRecordNumber,
 					PatientName:        updatedMeal.Patient.Name,
@@ -110,10 +112,10 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 				})
 			}
 		}
-		addLog("RoomID", existingMeal.RoomID, meal.RoomID)
-		addLog("RoomType", existingMeal.Room.RoomTypeID, updatedMeal.Room.RoomTypeID)
-		addLog("MealTypeID", existingMeal.MealTypeID, meal.MealTypeID)
-		addLog("Notes", existingMeal.Notes, meal.Notes)
+		addLog("RoomID", existingMeal.Room.Name, updatedMeal.Room.Name)
+		addLog("RoomType", existingMeal.Room.RoomType.Name, updatedMeal.Room.RoomType.Name)
+		addLog("MealTypeID", existingMeal.MealTypeID, updatedMeal.MealTypeID)
+		addLog("Notes", existingMeal.Notes, updatedMeal.Notes)
 		if len(logs) > 0 {
 			if err := tx.Create(&logs).Error; err != nil {
 				return err
@@ -127,13 +129,12 @@ func (r *dailyPatientMealRepo) Update(meal *model.DailyPatientMeal) (*model.Dail
 			First(&reloadedMeal, meal.ID).Error; err != nil {
 			return err
 		}
-		meal = &reloadedMeal
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return meal, err
+	return &reloadedMeal, err
 }
 
 func (r *dailyPatientMealRepo) Delete(id uint) error {
@@ -202,7 +203,7 @@ func (r *dailyPatientMealRepo) ReplaceDiets(meal *model.DailyPatientMeal, dietID
 		if oldDietStr != newDietStr {
 			log := model.DailyPatientMealLog{
 				DailyPatientMealID: meal.ID,
-				RoomTypeID:         meal.Room.RoomType.ID,
+				RoomTypeName:       meal.Room.RoomType.Name,
 				RoomName:           meal.Room.Name,
 				PatientMRN:         meal.Patient.MedicalRecordNumber,
 				PatientName:        meal.Patient.Name,
