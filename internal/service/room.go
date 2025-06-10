@@ -127,7 +127,6 @@ func (s *roomService) SyncFromSIMRS(token *string, roomTypeID uint, roomTypeCode
 
 	for _, kamar := range result.Response {
 		existingRoom, err := s.roomRepo.FindByCode(kamar.Kode)
-		fmt.Println(errors.Is(err, gorm.ErrRecordNotFound))
 		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 			request := request.CreateRoom{
 				Code:           kamar.Kode,
