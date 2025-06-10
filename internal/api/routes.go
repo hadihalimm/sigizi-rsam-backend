@@ -79,6 +79,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		patient.DELETE("/:id", s.patientHandler.Delete)
 		patient.GET("/filter", s.patientHandler.FilterByRMN)
 		patient.GET("/paginated", s.patientHandler.GetAllWithPaginationAndKeyword)
+		patient.GET("/find-from-simrs", s.patientHandler.FindFromSIMRS)
 	}
 
 	dailyPatientMeal := api.Group("/daily-patient-meal")
