@@ -20,7 +20,7 @@ func InitLogger() {
 
 func WithRequestContext(logger *zap.SugaredLogger, c *gin.Context) *zap.SugaredLogger {
 	return logger.With(
-		"userID", c.GetString("userID"),
+		"userID", c.GetUint("userID"),
 		"ip", c.ClientIP(),
 		"path", c.FullPath(),
 		"method", c.Request.Method,
