@@ -21,7 +21,7 @@ type DailyPatientMeal struct {
 type DailyPatientMealLog struct {
 	ID                 uint      `gorm:"primaryKey" json:"id"`
 	DailyPatientMealID uint      `gorm:"not null" json:"dailyPatientMealID"`
-	RoomTypeID         uint      `gorm:"not null" json:"roomID"`
+	RoomTypeName       string    `gorm:"not null" json:"roomTypeName"`
 	RoomName           string    `gorm:"not null" json:"roomName"`
 	PatientMRN         string    `gorm:"not null" json:"patientMRN"`
 	PatientName        string    `gorm:"not null" json:"patientName"`
