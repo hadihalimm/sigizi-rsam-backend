@@ -42,7 +42,7 @@ func (s *patientService) Create(request request.CreatePatient) (*model.Patient, 
 
 	newPatient := &model.Patient{
 		MedicalRecordNumber: request.MedicalRecordNumber,
-		Name:                request.Name,
+		Name:                strings.ToLower(request.Name),
 		DateOfBirth:         request.DateOfBirth.Truncate((24 * time.Hour)),
 	}
 
