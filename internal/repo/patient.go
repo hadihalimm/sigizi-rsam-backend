@@ -104,7 +104,7 @@ func (r *patientRepo) FindAllWithPaginationAndKeyword(
 		return nil, 0, tx.Error
 	}
 
-	tx = query.Limit(limit).Offset(offset).Preload("Allergies").Find(&patients)
+	tx = query.Order("updated_at DESC").Limit(limit).Offset(offset).Preload("Allergies").Find(&patients)
 	if tx.Error != nil {
 		return nil, 0, tx.Error
 	}
