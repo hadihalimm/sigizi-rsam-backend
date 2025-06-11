@@ -37,7 +37,7 @@ type Server struct {
 func NewServer() *http.Server {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("No .env file found")
+		log.Print("No .env file found")
 	}
 	env := os.Getenv("SIGIZI_ENV")
 	if env == "" {
@@ -46,9 +46,8 @@ func NewServer() *http.Server {
 	envFile := ".env." + env
 	err = godotenv.Load(envFile)
 	if err != nil {
-		log.Fatalf("No %s file found", envFile)
+		log.Print("No %s file found", envFile)
 	}
-	fmt.Println(os.Getenv("DB_HOST"))
 
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db := config.ConnectToDatabase()
