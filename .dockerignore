@@ -1,0 +1,39 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output folders
+bin/
+dist/
+tmp/
+
+# Go build cache & mod cache
+*.out
+*.o
+*.a
+vendor/
+pkg/
+
+# Git
+.git
+.gitignore
+
+# IDE/editor files
+*.swp
+*.swo
+*.bak
+*.tmp
+.idea/
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env*
+!env.example
