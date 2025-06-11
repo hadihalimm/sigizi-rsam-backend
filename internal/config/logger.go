@@ -11,6 +11,8 @@ var Logger *zap.SugaredLogger
 func InitLogger() {
 	cfg := zap.NewProductionConfig()
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	cfg.OutputPaths = []string{"NUL"}
+	cfg.ErrorOutputPaths = []string{"NUL"}
 	logger, err := cfg.Build()
 	if err != nil {
 		panic("Failed to initialize logger: " + err.Error())
