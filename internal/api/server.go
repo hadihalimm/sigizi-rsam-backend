@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
 	"github.com/hadihalimm/sigizi-rsam/internal/repo"
 	"github.com/hadihalimm/sigizi-rsam/internal/service"
+	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -33,6 +35,21 @@ type Server struct {
 }
 
 func NewServer() *http.Server {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("No .env file found")
+	}
+	env := os.Getenv("SIGIZI_ENV")
+	if env == "" {
+		env = "dev"
+	}
+	envFile := ".env." + env
+	err = godotenv.Load(envFile)
+	if err != nil {
+		log.Fatalf("No %s file found", envFile)
+	}
+	fmt.Println(os.Getenv("DB_HOST"))
+
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db := config.ConnectToDatabase()
 	config.InitSession()
