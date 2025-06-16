@@ -243,7 +243,9 @@ func (r *dailyPatientMealRepo) FilterByDate(date time.Time) ([]model.DailyPatien
 	tx := r.db.Gorm.Preload("Patient").Preload("Patient.Allergies").Preload("Room").
 		Preload("Room.RoomType").Preload("MealType").Preload("Diets").
 		Joins("JOIN rooms ON rooms.id = daily_patient_meals.room_id").
+		Joins("JOIN room_types ON room_types.id = rooms.room_type_id").
 		Where("DATE(daily_patient_meals.date) = ?", date.Format("2006-01-02")).
+		Order("room_types.id").
 		Find(&meals)
 
 	if tx.Error != nil {
