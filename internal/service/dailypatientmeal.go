@@ -30,6 +30,7 @@ type DailyPatientMealService interface {
 		date time.Time, roomTypeID uint) ([]model.DailyPatientMealLog, error)
 	CountDietCombinationsByDate(
 		date time.Time) ([]DietCombinationCount, int, int, error)
+	CopyFromYesterday(date time.Time, roomTypeID uint) error
 }
 
 type dailyPatientMealService struct {
@@ -258,4 +259,36 @@ func (s *dailyPatientMealService) CountDietCombinationsByDate(
 		})
 	}
 	return result, complicationCount, nonComplicationCount, nil
+}
+
+func (s *dailyPatientMealService) CopyFromYesterday(date time.Time, roomTypeID uint) error {
+	yesterdayMeals, err := s.FilterByDateAndRoomType(date.AddDate(0, 0, -1), roomTypeID)
+	if err != nil {
+		return err
+	}
+	for _, meal := range yesterdayMeals {
+		newDailyMeal := &model.DailyPatientMeal{
+			PatientID:       meal.PatientID,
+			RoomID:          meal.RoomID,
+			MealTypeID:      meal.MealTypeID,
+			Date:            meal.Date.AddDate(0, 0, 1).Truncate((24 * time.Hour)),
+			Notes:           meal.Notes,
+			IsNewlyAdmitted: meal.IsNewlyAdmitted,
+			Diets:           meal.Diets,
+		}
+		copiedMeal, err := s.dailyPatientMealRepo.Create(newDailyMeal)
+		if err != nil {
+			return err
+		}
+		var dietIDs []uint
+		for _, diet := range meal.Diets {
+			dietIDs = append(dietIDs, diet.ID)
+		}
+		err = s.dailyPatientMealRepo.InsertDiets(copiedMeal, dietIDs)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

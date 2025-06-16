@@ -95,6 +95,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		dailyPatientMeal.GET("/count/diet", s.dailyPatientMealHandler.CountDietCombinationsByDate)
 		dailyPatientMeal.GET("/export", s.dailyPatientMealHandler.ExportToExcel)
 		dailyPatientMeal.GET("/logs", s.dailyPatientMealHandler.FilterLogsByDate)
+		dailyPatientMeal.POST("/copy-from-yesterday", s.dailyPatientMealHandler.CopyFromYesterday)
 	}
 
 	diet := api.Group("/diet")

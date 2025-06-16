@@ -263,3 +263,25 @@ func (h *DailyPatientMealHandler) CountDietCombinationsByDate(c *gin.Context) {
 		},
 	})
 }
+
+func (h *DailyPatientMealHandler) CopyFromYesterday(c *gin.Context) {
+	dateString := c.Query("date")
+	date, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	roomTypeUint64, _ := strconv.ParseUint(c.Query("roomType"), 10, 64)
+	roomTypeID := uint(roomTypeUint64)
+
+	err = h.dailyPatientMealService.CopyFromYesterday(date, roomTypeID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Successfully copied meals for RoomType %d %s", roomTypeID, dateString),
+		"data":    "",
+	})
+}
