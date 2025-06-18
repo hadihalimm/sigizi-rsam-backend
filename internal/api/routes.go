@@ -48,11 +48,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 		room.GET("/filter", s.roomHandler.FilterByRoomType)
 	}
 
-	food := api.Group("/food")
-	food.Use(s.RequireSession)
+	foodMaterial := api.Group("/food-material")
+	foodMaterial.Use(s.RequireSession)
 	{
-		food.GET("", s.foodMaterialHandler.GetAll)
-		food.GET("/:id", s.foodMaterialHandler.GetByID)
+		foodMaterial.GET("", s.foodMaterialHandler.GetAll)
+		foodMaterial.GET("/:id", s.foodMaterialHandler.GetByID)
 	}
 
 	mealType := api.Group("/meal-type")
@@ -62,11 +62,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 		mealType.GET("/:id", s.mealTypeHandler.GetByID)
 	}
 
-	mealItem := api.Group("/meal-item")
-	mealItem.Use(s.RequireSession)
+	food := api.Group("/food")
+	food.Use(s.RequireSession)
 	{
-		mealItem.GET("", s.foodHandler.GetAll)
-		mealItem.GET("/:id", s.foodHandler.GetByID)
+		food.GET("", s.foodHandler.GetAll)
+		food.GET("/:id", s.foodHandler.GetByID)
 	}
 
 	patient := api.Group("/patient")
@@ -138,11 +138,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 			room.DELETE("/:id", s.roomHandler.Delete)
 		}
 
-		food := admin.Group("/food")
+		foodMaterial := admin.Group("/food-material")
 		{
-			food.POST("", s.foodMaterialHandler.Create)
-			food.PATCH("/:id", s.foodMaterialHandler.Update)
-			food.DELETE("/:id", s.foodMaterialHandler.Delete)
+			foodMaterial.POST("", s.foodMaterialHandler.Create)
+			foodMaterial.PATCH("/:id", s.foodMaterialHandler.Update)
+			foodMaterial.DELETE("/:id", s.foodMaterialHandler.Delete)
 		}
 
 		mealType := admin.Group("/meal-type")
@@ -152,11 +152,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 			mealType.DELETE("/:id", s.mealTypeHandler.Delete)
 		}
 
-		mealItem := admin.Group("/meal-item")
+		food := admin.Group("/food")
 		{
-			mealItem.POST("", s.foodHandler.Create)
-			mealItem.PATCH("/:id", s.foodHandler.Update)
-			mealItem.DELETE("/:id", s.foodHandler.Delete)
+			food.POST("", s.foodHandler.Create)
+			food.PATCH("/:id", s.foodHandler.Update)
+			food.DELETE("/:id", s.foodHandler.Delete)
 		}
 
 		diet := admin.Group("/diet")
