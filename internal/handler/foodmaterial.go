@@ -23,7 +23,7 @@ func (h *FoodMaterialHandler) Create(c *gin.Context) {
 		return
 	}
 
-	food, err := h.foodMaterialService.Create(request)
+	foodMaterial, err := h.foodMaterialService.Create(request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -31,12 +31,12 @@ func (h *FoodMaterialHandler) Create(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Food material created successfully",
-		"data":    food,
+		"data":    foodMaterial,
 	})
 }
 
 func (h *FoodMaterialHandler) GetAll(c *gin.Context) {
-	foods, err := h.foodMaterialService.GetAll()
+	foodMaterials, err := h.foodMaterialService.GetAll()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -44,14 +44,14 @@ func (h *FoodMaterialHandler) GetAll(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully retrieved all food materials",
-		"data":    foods,
+		"data":    foodMaterials,
 	})
 }
 
 func (h *FoodMaterialHandler) GetByID(c *gin.Context) {
 	idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	id := uint(idUint64)
-	food, err := h.foodMaterialService.GetByID(id)
+	foodMaterial, err := h.foodMaterialService.GetByID(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,7 +59,7 @@ func (h *FoodMaterialHandler) GetByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Food material retrieved successfully",
-		"data":    food,
+		"data":    foodMaterial,
 	})
 }
 
@@ -72,7 +72,7 @@ func (h *FoodMaterialHandler) Update(c *gin.Context) {
 
 	idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	id := uint(idUint64)
-	food, err := h.foodMaterialService.Update(id, request)
+	foodMaterial, err := h.foodMaterialService.Update(id, request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -80,7 +80,7 @@ func (h *FoodMaterialHandler) Update(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Food material updated successfully",
-		"data":    food,
+		"data":    foodMaterial,
 	})
 }
 
