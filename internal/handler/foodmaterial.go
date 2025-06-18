@@ -13,10 +13,9 @@ type FoodMaterialHandler struct {
 	foodMaterialService service.FoodMaterialService
 }
 
-func NewFoodMaterialHandler(foodService service.FoodMaterialService) *FoodMaterialHandler {
-	return &FoodMaterialHandler{foodMaterialService: foodService}
+func NewFoodMaterialHandler(foodMaterialService service.FoodMaterialService) *FoodMaterialHandler {
+	return &FoodMaterialHandler{foodMaterialService: foodMaterialService}
 }
-
 func (h *FoodMaterialHandler) Create(c *gin.Context) {
 	var request request.CreateFoodMaterial
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
