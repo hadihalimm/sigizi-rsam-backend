@@ -63,7 +63,7 @@ func NewServer() *http.Server {
 
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
-		&model.Food{}, &model.MealType{}, &model.MealItem{},
+		&model.FoodMaterial{}, &model.MealType{}, &model.MealItem{},
 		&model.Patient{}, &model.DailyPatientMeal{}, &model.DailyPatientMealLog{},
 		&model.Diet{}, &model.Allergy{})
 

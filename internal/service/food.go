@@ -9,59 +9,59 @@ import (
 	"github.com/hadihalimm/sigizi-rsam/internal/repo"
 )
 
-type FoodService interface {
-	Create(request request.CreateFood) (*model.Food, error)
-	GetAll() ([]model.Food, error)
-	GetByID(id uint) (*model.Food, error)
-	Update(id uint, request request.UpdateFood) (*model.Food, error)
+type FoodMaterialService interface {
+	Create(request request.CreateFoodMaterial) (*model.FoodMaterial, error)
+	GetAll() ([]model.FoodMaterial, error)
+	GetByID(id uint) (*model.FoodMaterial, error)
+	Update(id uint, request request.UpdateFoodMaterial) (*model.FoodMaterial, error)
 	Delete(id uint) error
 }
 
-type foodService struct {
-	foodRepo repo.FoodRepo
-	validate *validator.Validate
+type foodMaterialService struct {
+	foodMaterialRepo repo.FoodMaterialRepo
+	validate         *validator.Validate
 }
 
-func NewFoodService(foodRepo repo.FoodRepo, validate *validator.Validate) FoodService {
-	return &foodService{foodRepo: foodRepo, validate: validate}
+func NewFoodService(foodRepo repo.FoodMaterialRepo, validate *validator.Validate) FoodMaterialService {
+	return &foodMaterialService{foodMaterialRepo: foodRepo, validate: validate}
 }
 
-func (s *foodService) Create(request request.CreateFood) (*model.Food, error) {
+func (s *foodMaterialService) Create(request request.CreateFoodMaterial) (*model.FoodMaterial, error) {
 	if err := s.validate.Struct(request); err != nil {
 		return nil, err
 	}
 
-	newFood := &model.Food{
+	newFoodMaterial := &model.FoodMaterial{
 		Name:         request.Name,
 		Unit:         request.Unit,
 		PricePerUnit: request.PricePerUnit,
 	}
-	return s.foodRepo.Create(newFood)
+	return s.foodMaterialRepo.Create(newFoodMaterial)
 }
 
-func (s *foodService) GetAll() ([]model.Food, error) {
-	return s.foodRepo.FindAll()
+func (s *foodMaterialService) GetAll() ([]model.FoodMaterial, error) {
+	return s.foodMaterialRepo.FindAll()
 }
 
-func (s *foodService) GetByID(id uint) (*model.Food, error) {
-	return s.foodRepo.FindByID(id)
+func (s *foodMaterialService) GetByID(id uint) (*model.FoodMaterial, error) {
+	return s.foodMaterialRepo.FindByID(id)
 }
 
-func (s *foodService) Update(id uint, request request.UpdateFood) (*model.Food, error) {
+func (s *foodMaterialService) Update(id uint, request request.UpdateFoodMaterial) (*model.FoodMaterial, error) {
 	if err := s.validate.Struct(request); err != nil {
 		return nil, err
 	}
-	food, err := s.foodRepo.FindByID(id)
+	foodMaterial, err := s.foodMaterialRepo.FindByID(id)
 	if err != nil {
-		return nil, errors.New("food not found")
+		return nil, errors.New("food material not found")
 	}
 
-	food.Name = request.Name
-	food.Unit = request.Unit
-	food.PricePerUnit = request.PricePerUnit
-	return s.foodRepo.Update(food)
+	foodMaterial.Name = request.Name
+	foodMaterial.Unit = request.Unit
+	foodMaterial.PricePerUnit = request.PricePerUnit
+	return s.foodMaterialRepo.Update(foodMaterial)
 }
 
-func (s *foodService) Delete(id uint) error {
-	return s.foodRepo.Delete(id)
+func (s *foodMaterialService) Delete(id uint) error {
+	return s.foodMaterialRepo.Delete(id)
 }

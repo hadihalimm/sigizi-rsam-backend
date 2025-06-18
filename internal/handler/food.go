@@ -10,15 +10,15 @@ import (
 )
 
 type FoodHandler struct {
-	foodService service.FoodService
+	foodService service.FoodMaterialService
 }
 
-func NewFoodHandler(foodService service.FoodService) *FoodHandler {
+func NewFoodHandler(foodService service.FoodMaterialService) *FoodHandler {
 	return &FoodHandler{foodService: foodService}
 }
 
 func (h *FoodHandler) Create(c *gin.Context) {
-	var request request.CreateFood
+	var request request.CreateFoodMaterial
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -65,7 +65,7 @@ func (h *FoodHandler) GetByID(c *gin.Context) {
 }
 
 func (h *FoodHandler) Update(c *gin.Context) {
-	var request request.UpdateFood
+	var request request.UpdateFoodMaterial
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

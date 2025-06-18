@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type Food struct {
+type FoodMaterial struct {
 	ID           uint      `gorm:"primaryKey" json:"id"`
 	Name         string    `gorm:"not null" json:"name"`
 	Unit         string    `gorm:"not null" json:"unit"`
