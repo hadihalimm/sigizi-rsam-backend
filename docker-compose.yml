@@ -9,6 +9,8 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+    environment:
+      - TZ=Asia/Jakarta
     logging:
       driver: json-file
       options:
