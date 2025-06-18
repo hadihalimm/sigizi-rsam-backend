@@ -51,8 +51,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	food := api.Group("/food")
 	food.Use(s.RequireSession)
 	{
-		food.GET("", s.foodHandler.GetAll)
-		food.GET("/:id", s.foodHandler.GetByID)
+		food.GET("", s.foodMaterialHandler.GetAll)
+		food.GET("/:id", s.foodMaterialHandler.GetByID)
 	}
 
 	mealType := api.Group("/meal-type")
@@ -140,9 +140,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 		food := admin.Group("/food")
 		{
-			food.POST("", s.foodHandler.Create)
-			food.PATCH("/:id", s.foodHandler.Update)
-			food.DELETE("/:id", s.foodHandler.Delete)
+			food.POST("", s.foodMaterialHandler.Create)
+			food.PATCH("/:id", s.foodMaterialHandler.Update)
+			food.DELETE("/:id", s.foodMaterialHandler.Delete)
 		}
 
 		mealType := admin.Group("/meal-type")

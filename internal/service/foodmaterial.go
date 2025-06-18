@@ -22,7 +22,7 @@ type foodMaterialService struct {
 	validate         *validator.Validate
 }
 
-func NewFoodService(foodRepo repo.FoodMaterialRepo, validate *validator.Validate) FoodMaterialService {
+func NewFoodMaterialService(foodRepo repo.FoodMaterialRepo, validate *validator.Validate) FoodMaterialService {
 	return &foodMaterialService{foodMaterialRepo: foodRepo, validate: validate}
 }
 

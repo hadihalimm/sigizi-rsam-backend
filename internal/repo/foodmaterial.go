@@ -17,7 +17,7 @@ type foodMaterialRepo struct {
 	db *config.Database
 }
 
-func NewFoodRepo(db *config.Database) FoodMaterialRepo {
+func NewFoodMaterialRepo(db *config.Database) FoodMaterialRepo {
 	return &foodMaterialRepo{db: db}
 }
 

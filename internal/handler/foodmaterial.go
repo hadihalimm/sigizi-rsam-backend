@@ -9,62 +9,62 @@ import (
 	"github.com/hadihalimm/sigizi-rsam/internal/service"
 )
 
-type FoodHandler struct {
-	foodService service.FoodMaterialService
+type FoodMaterialHandler struct {
+	foodMaterialService service.FoodMaterialService
 }
 
-func NewFoodHandler(foodService service.FoodMaterialService) *FoodHandler {
-	return &FoodHandler{foodService: foodService}
+func NewFoodMaterialHandler(foodService service.FoodMaterialService) *FoodMaterialHandler {
+	return &FoodMaterialHandler{foodMaterialService: foodService}
 }
 
-func (h *FoodHandler) Create(c *gin.Context) {
+func (h *FoodMaterialHandler) Create(c *gin.Context) {
 	var request request.CreateFoodMaterial
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	food, err := h.foodService.Create(request)
+	food, err := h.foodMaterialService.Create(request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Food created successfully",
+		"message": "Food material created successfully",
 		"data":    food,
 	})
 }
 
-func (h *FoodHandler) GetAll(c *gin.Context) {
-	foods, err := h.foodService.GetAll()
+func (h *FoodMaterialHandler) GetAll(c *gin.Context) {
+	foods, err := h.foodMaterialService.GetAll()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Successfully retrieved all foods",
+		"message": "Successfully retrieved all food materials",
 		"data":    foods,
 	})
 }
 
-func (h *FoodHandler) GetByID(c *gin.Context) {
+func (h *FoodMaterialHandler) GetByID(c *gin.Context) {
 	idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	id := uint(idUint64)
-	food, err := h.foodService.GetByID(id)
+	food, err := h.foodMaterialService.GetByID(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Food retrieved successfully",
+		"message": "Food material retrieved successfully",
 		"data":    food,
 	})
 }
 
-func (h *FoodHandler) Update(c *gin.Context) {
+func (h *FoodMaterialHandler) Update(c *gin.Context) {
 	var request request.UpdateFoodMaterial
 	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -73,28 +73,28 @@ func (h *FoodHandler) Update(c *gin.Context) {
 
 	idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	id := uint(idUint64)
-	food, err := h.foodService.Update(id, request)
+	food, err := h.foodMaterialService.Update(id, request)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Food updated successfully",
+		"message": "Food material updated successfully",
 		"data":    food,
 	})
 }
 
-func (h *FoodHandler) Delete(c *gin.Context) {
+func (h *FoodMaterialHandler) Delete(c *gin.Context) {
 	idUint64, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	id := uint(idUint64)
-	err := h.foodService.Delete(id)
+	err := h.foodMaterialService.Delete(id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Food deleted successfully",
+		"message": "Food material deleted successfully",
 	})
 }

@@ -25,7 +25,7 @@ type Server struct {
 	userHandler             *handler.UserHandler
 	roomTypeHandler         *handler.RoomTypeHandler
 	roomHandler             *handler.RoomHandler
-	foodHandler             *handler.FoodHandler
+	foodMaterialHandler     *handler.FoodMaterialHandler
 	mealTypeHandler         *handler.MealTypeHandler
 	mealItemHandler         *handler.MealItemHandler
 	patientHandler          *handler.PatientHandler
@@ -83,9 +83,9 @@ func NewServer() *http.Server {
 	roomTypeHandler := handler.NewRoomTypeHandler(roomTypeService, roomService)
 	roomHandler := handler.NewRoomHandler(roomService)
 
-	foodRepo := repo.NewFoodRepo(db)
-	foodService := service.NewFoodService(foodRepo, validator)
-	foodHandler := handler.NewFoodHandler(foodService)
+	foodMaterialRepo := repo.NewFoodMaterialRepo(db)
+	foodMaterialService := service.NewFoodMaterialService(foodMaterialRepo, validator)
+	foodMaterialHandler := handler.NewFoodMaterialHandler(foodMaterialService)
 
 	mealTypeRepo := repo.NewMealTypeRepo(db)
 	mealTypeService := service.NewMealTypeService(mealTypeRepo, validator)
@@ -118,7 +118,7 @@ func NewServer() *http.Server {
 		userHandler:             userHandler,
 		roomTypeHandler:         roomTypeHandler,
 		roomHandler:             roomHandler,
-		foodHandler:             foodHandler,
+		foodMaterialHandler:     foodMaterialHandler,
 		mealTypeHandler:         mealTypeHandler,
 		mealItemHandler:         mealItemHandler,
 		patientHandler:          patientHandler,
