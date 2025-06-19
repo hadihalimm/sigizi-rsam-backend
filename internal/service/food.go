@@ -25,44 +25,58 @@ func NewFoodService(foodRepo repo.FoodRepo,
 	return &foodService{foodRepo: foodRepo, validate: validate}
 }
 
-func (s *foodService) Create(request request.CreateMealItem) (*model.food, error) {
+func (s *foodService) Create(request request.CreateFood) (*model.Food, error) {
 	if err := s.validate.Struct(request); err != nil {
 		return nil, err
 	}
 
-	newItem := &model.Food{
-		MealTypeID: request.MealTypeID,
-		FoodID:     request.FoodID,
-		Quantity:   request.Quantity,
+	var usages []model.FoodMaterialUsage
+	for _, usage := range request.FoodMaterialUsages {
+		usages = append(usages, model.FoodMaterialUsage{
+			FoodMaterialID: usage.FoodMaterialID,
+			QuantityUsed:   usage.QuantityUsed,
+		})
 	}
 
-	return s.foodRepo.Create(newItem)
+	newFood := &model.Food{
+		Name:               request.Name,
+		FoodMaterialUsages: usages,
+	}
+
+	return s.foodRepo.Create(newFood)
 }
 
 func (s *foodService) GetAll() ([]model.Food, error) {
-	return s.mealItemRepo.FindAll()
+	return s.foodRepo.FindAll()
 }
 
 func (s *foodService) GetByID(id uint) (*model.Food, error) {
 	return s.foodRepo.FindByID(id)
 }
 
-func (s *foodService) Update(id uint, request request.UpdateMealItem) (*model.Food, error) {
+func (s *foodService) Update(id uint, request request.UpdateFood) (*model.Food, error) {
 	if err := s.validate.Struct(request); err != nil {
 		return nil, err
 	}
 
-	item, err := s.foodRepo.FindByID(id)
+	food, err := s.foodRepo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	item.MealTypeID = request.MealTypeID
-	item.FoodID = request.FoodID
-	item.Quantity = request.Quantity
-	item.MealType = nil
-	item.Food = nil
-	return s.foodRepo.Update(item)
+	food.Name = request.Name
+	food.FoodMaterialUsages = []model.FoodMaterialUsage{}
+	var usages []model.FoodMaterialUsage
+	for _, usage := range request.FoodMaterialUsages {
+		usages = append(usages, model.FoodMaterialUsage{
+			FoodID:         id, // optional — can also be set in repo
+			FoodMaterialID: usage.FoodMaterialID,
+			QuantityUsed:   usage.QuantityUsed,
+		})
+	}
+	food.FoodMaterialUsages = usages
+
+	return s.foodRepo.Update(food)
 }
 
 func (s *foodService) Delete(id uint) error {

@@ -1,13 +1,17 @@
 package request
 
 type CreateFood struct {
-	MealTypeID uint    `json:"mealTypeID" binding:"required" validate:"required"`
-	FoodID     uint    `json:"foodID" binding:"required" validate:"required"`
-	Quantity   float64 `json:"quantity" binding:"required" validate:"required"`
+	Name               string `json:"name" binding:"required" validate:"required"`
+	FoodMaterialUsages []struct {
+		FoodMaterialID uint    `json:"foodMaterialID" validate:"required"`
+		QuantityUsed   float64 `json:"quantityUsed" validate:"required,gt=0"`
+	} `json:"foodMaterialUsages" validate:"required,dive"`
 }
 
 type UpdateFood struct {
-	MealTypeID uint    `json:"mealTypeID" binding:"required" validate:"required"`
-	FoodID     uint    `json:"foodID" binding:"required" validate:"required"`
-	Quantity   float64 `json:"quantity" binding:"required" validate:"required"`
+	Name               string `json:"name" binding:"required" validate:"required"`
+	FoodMaterialUsages []struct {
+		FoodMaterialID uint    `json:"foodMaterialID" validate:"required"`
+		QuantityUsed   float64 `json:"quantityUsed" validate:"required,gt=0"`
+	} `json:"foodMaterialUsages" validate:"required,dive"`
 }

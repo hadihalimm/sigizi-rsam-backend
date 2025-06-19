@@ -59,11 +59,11 @@ func NewServer() *http.Server {
 	// 	&model.RoomType{}, &model.Room{},
 	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
 	// 	&model.Patient{}, &model.DailyPatientMeal{})
-	// db.Gorm.Migrator().DropTable(&model.DailyPatientMealLog{})
+	db.Gorm.Migrator().DropTable(&model.FoodMaterialUsage{}, &model.Food{})
 
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
-		&model.FoodMaterial{}, &model.MealType{}, &model.Food{},
+		&model.FoodMaterial{}, &model.MealType{}, &model.Food{}, &model.FoodMaterialUsage{},
 		&model.Patient{}, &model.DailyPatientMeal{}, &model.DailyPatientMealLog{},
 		&model.Diet{}, &model.Allergy{})
 

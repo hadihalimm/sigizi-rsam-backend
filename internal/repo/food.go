@@ -26,16 +26,25 @@ func (r *foodRepo) Create(food *model.Food) (*model.Food, error) {
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	tx = r.db.Gorm.Preload("MealType").Preload("Food").First(&food, food.ID)
+	// for i := range food.FoodMaterialUsages {
+	// 	food.FoodMaterialUsages[i].FoodID = food.ID
+	// 	fmt.Printf("Inserting usage: %+v\n", food.FoodMaterialUsages[i])
+	// 	if err := r.db.Gorm.Create(&food.FoodMaterialUsages[i]).Error; err != nil {
+	// 		return nil, err
+	// 	}
+	// }
+	var created model.Food
+	tx = r.db.Gorm.Preload("FoodMaterialUsages.FoodMaterial").First(&created, food.ID)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	return food, nil
+
+	return &created, nil
 }
 
 func (r *foodRepo) FindAll() ([]model.Food, error) {
 	var foods []model.Food
-	tx := r.db.Gorm.Preload("MealType").Preload("Food").Find(&foods)
+	tx := r.db.Gorm.Preload("FoodMaterialUsages.FoodMaterial").Find(&foods)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -44,7 +53,7 @@ func (r *foodRepo) FindAll() ([]model.Food, error) {
 
 func (r *foodRepo) FindByID(id uint) (*model.Food, error) {
 	var food model.Food
-	tx := r.db.Gorm.Preload("MealType").Preload("Food").First(&food, id)
+	tx := r.db.Gorm.Preload("FoodMaterialUsages.FoodMaterial").First(&food, id)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -52,18 +61,28 @@ func (r *foodRepo) FindByID(id uint) (*model.Food, error) {
 }
 
 func (r *foodRepo) Update(food *model.Food) (*model.Food, error) {
-	tx := r.db.Gorm.Save(food)
-	if tx.Error != nil {
-		return nil, tx.Error
+	if err := r.db.Gorm.Where("food_id = ?", food.ID).Delete(&model.FoodMaterialUsage{}).Error; err != nil {
+		return nil, err
 	}
-	if err := r.db.Gorm.Preload("MealType").Preload("Food").First(&food, food.ID).Error; err != nil {
+	if err := r.db.Gorm.Save(&food).Error; err != nil {
 		return nil, err
 	}
 
-	return food, nil
+	var updated model.Food
+	if err := r.db.Gorm.Preload("FoodMaterialUsages.FoodMaterial").First(&updated, food.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return &updated, nil
+
 }
 
 func (r *foodRepo) Delete(id uint) error {
-	tx := r.db.Gorm.Delete(&model.Food{}, id)
-	return tx.Error
+	if err := r.db.Gorm.Where("food_id = ?", id).Delete(&model.FoodMaterialUsage{}).Error; err != nil {
+		return err
+	}
+	if err := r.db.Gorm.Delete(&model.Food{}, id).Error; err != nil {
+		return err
+	}
+	return nil
 }
