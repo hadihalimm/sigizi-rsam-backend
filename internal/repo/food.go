@@ -9,6 +9,7 @@ type FoodRepo interface {
 	Create(item *model.Food) (*model.Food, error)
 	FindAll() ([]model.Food, error)
 	FindByID(id uint) (*model.Food, error)
+	FindByIDs(ids []uint) ([]model.Food, error)
 	Update(item *model.Food) (*model.Food, error)
 	Delete(id uint) error
 }
@@ -58,6 +59,14 @@ func (r *foodRepo) FindByID(id uint) (*model.Food, error) {
 		return nil, tx.Error
 	}
 	return &food, nil
+}
+
+func (r *foodRepo) FindByIDs(ids []uint) ([]model.Food, error) {
+	var foods []model.Food
+	if err := r.db.Gorm.Where("id IN ?", ids).Find(&foods).Error; err != nil {
+		return nil, err
+	}
+	return foods, nil
 }
 
 func (r *foodRepo) Update(food *model.Food) (*model.Food, error) {
