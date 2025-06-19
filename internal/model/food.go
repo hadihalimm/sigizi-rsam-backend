@@ -7,8 +7,8 @@ type Food struct {
 }
 
 type FoodMaterialUsage struct {
-	FoodID         uint    `gorm:"primaryKey" json:"foodID"`
-	FoodMaterialID uint    `gorm:"primaryKey" json:"foodMaterialID"`
-	QuantityUsed   float64 `gorm:"not null" json:"quantityUsed"`
-	FoodMaterial   FoodMaterial
+	FoodID         uint         `gorm:"primaryKey" json:"foodID"`
+	FoodMaterialID uint         `gorm:"primaryKey" json:"foodMaterialID"`
+	QuantityUsed   float64      `gorm:"not null" json:"quantityUsed"`
+	FoodMaterial   FoodMaterial `json:"foodMaterial"`
 }
