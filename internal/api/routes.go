@@ -69,6 +69,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 		food.GET("/:id", s.foodHandler.GetByID)
 	}
 
+	mealMenu := api.Group("/meal-menu")
+	mealMenu.Use(s.RequireSession)
+	{
+		mealMenu.GET("", s.mealMenuHandler.GetAll)
+		mealMenu.GET("/:id", s.mealMenuHandler.GetByID)
+	}
+
 	patient := api.Group("/patient")
 	patient.Use(s.RequireSession)
 	{
@@ -157,6 +164,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 			food.POST("", s.foodHandler.Create)
 			food.PATCH("/:id", s.foodHandler.Update)
 			food.DELETE("/:id", s.foodHandler.Delete)
+		}
+
+		mealMenu := admin.Group("/meal-menu")
+		{
+			mealMenu.POST("", s.mealMenuHandler.Create)
+			mealMenu.PATCH("/:id", s.mealMenuHandler.Update)
+			mealMenu.DELETE("/:id", s.mealMenuHandler.Delete)
 		}
 
 		diet := admin.Group("/diet")

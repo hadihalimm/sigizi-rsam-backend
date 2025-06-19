@@ -28,6 +28,7 @@ type Server struct {
 	foodMaterialHandler     *handler.FoodMaterialHandler
 	mealTypeHandler         *handler.MealTypeHandler
 	foodHandler             *handler.FoodHandler
+	mealMenuHandler         *handler.MealMenuHandler
 	patientHandler          *handler.PatientHandler
 	dailyPatientMealHandler *handler.DailyPatientMealHandler
 	dietHandler             *handler.DietHandler
@@ -59,11 +60,12 @@ func NewServer() *http.Server {
 	// 	&model.RoomType{}, &model.Room{},
 	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
 	// 	&model.Patient{}, &model.DailyPatientMeal{})
-	db.Gorm.Migrator().DropTable(&model.FoodMaterialUsage{}, &model.Food{})
+	// db.Gorm.Migrator().DropTable(&model.MealMenu{})
 
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{}, &model.Room{},
-		&model.FoodMaterial{}, &model.MealType{}, &model.Food{}, &model.FoodMaterialUsage{},
+		&model.FoodMaterial{}, &model.MealType{},
+		&model.Food{}, &model.FoodMaterialUsage{}, &model.MealMenu{},
 		&model.Patient{}, &model.DailyPatientMeal{}, &model.DailyPatientMealLog{},
 		&model.Diet{}, &model.Allergy{})
 
@@ -95,6 +97,10 @@ func NewServer() *http.Server {
 	foodService := service.NewFoodService(foodRepo, validator)
 	foodHandler := handler.NewFoodHandler(foodService)
 
+	mealMenuRepo := repo.NewMealMenuRepo(db)
+	mealMenuService := service.NewMealMenuService(mealMenuRepo, foodRepo, validator)
+	mealMenuHandler := handler.NewMealMenuHandler(mealMenuService)
+
 	patientRepo := repo.NewPatientRepo(db)
 	patientService := service.NewPatientService(patientRepo, validator)
 	patientHandler := handler.NewPatientHandler(patientService)
@@ -121,6 +127,7 @@ func NewServer() *http.Server {
 		foodMaterialHandler:     foodMaterialHandler,
 		mealTypeHandler:         mealTypeHandler,
 		foodHandler:             foodHandler,
+		mealMenuHandler:         mealMenuHandler,
 		patientHandler:          patientHandler,
 		dailyPatientMealHandler: dailyPatientMealHandler,
 		dietHandler:             dietHandler,
