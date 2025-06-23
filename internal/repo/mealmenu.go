@@ -44,6 +44,7 @@ func (r *mealMenuRepo) FindAll() ([]model.MealMenu, error) {
 	tx := r.db.Gorm.Preload("Foods").
 		Preload("Foods.FoodMaterialUsages").
 		Preload("Foods.FoodMaterialUsages.FoodMaterial").
+		Preload("MealType").
 		Find(&menus)
 	if tx.Error != nil {
 		return nil, tx.Error
