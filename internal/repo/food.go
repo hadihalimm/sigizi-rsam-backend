@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"errors"
+
 	"github.com/hadihalimm/sigizi-rsam/internal/config"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
 )
@@ -87,6 +89,17 @@ func (r *foodRepo) Update(food *model.Food) (*model.Food, error) {
 }
 
 func (r *foodRepo) Delete(id uint) error {
+	var menus []model.MealMenu
+	err := r.db.Gorm.Joins("JOIN meal_foods ON meal_foods.meal_menu_id = meal_menus.id").
+		Where("meal_foods.food_id = ?", id).
+		Find(&menus).Error
+	if err != nil {
+		return err
+	}
+	if len(menus) > 0 {
+		return errors.New("Terdapat menu yang masih terikat dengan makanan ini")
+	}
+
 	if err := r.db.Gorm.Where("food_id = ?", id).Delete(&model.FoodMaterialUsage{}).Error; err != nil {
 		return err
 	}
