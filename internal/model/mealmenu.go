@@ -19,4 +19,6 @@ type MealMenuTemplate struct {
 	ID        uint       `gorm:"primaryKey" json:"id"`
 	Name      string     `gorm:"unique;not null" json:"name"`
 	MealMenus []MealMenu `json:"mealMenus"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 }
