@@ -101,3 +101,87 @@ func (h *MealMenuHandler) Delete(c *gin.Context) {
 		"message": "Meal menu deleted successfully",
 	})
 }
+
+func (h *MealMenuHandler) CreateMealMenuTemplate(c *gin.Context) {
+	var request request.CreateMealMenuTemplate
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.mealMenuService.CreateMealMenuTemplate(request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Meal menu template created successfully",
+		"data":    nil,
+	})
+}
+
+func (h *MealMenuHandler) GetAllMealMenuTemplate(c *gin.Context) {
+	menus, err := h.mealMenuService.FindAllMealMenuTemplate()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "All Meal menu templates retrieved successfully",
+		"data":    menus,
+	})
+}
+
+func (h *MealMenuHandler) GetByIDMealMenuTemplate(c *gin.Context) {
+	idUint64, _ := strconv.ParseUint(c.Param("template-id"), 10, 64)
+	id := uint(idUint64)
+	menu, err := h.mealMenuService.FindByIDMealMenuTemplate(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Meal menu template retrieved successfully",
+		"data":    menu,
+	})
+}
+
+func (h *MealMenuHandler) UpdateMealMenuTemplate(c *gin.Context) {
+	var request request.UpdateMealMenuTemplate
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	idUint64, _ := strconv.ParseUint(c.Param("template-id"), 10, 64)
+	id := uint(idUint64)
+
+	menu, err := h.mealMenuService.UpdateMealMenuTemplate(id, request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Meal menu template updated successfully",
+		"data":    menu,
+	})
+}
+
+func (h *MealMenuHandler) DeleteMealMenuTemplate(c *gin.Context) {
+	idUint64, _ := strconv.ParseUint(c.Param("template-id"), 10, 64)
+	id := uint(idUint64)
+
+	err := h.mealMenuService.DeleteMealMenuTemplate(id)
+	fmt.Println(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Meal menu template deleted successfully",
+	})
+}

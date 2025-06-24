@@ -60,14 +60,21 @@ func NewServer() *http.Server {
 	// 	&model.RoomType{}, &model.Room{},
 	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
 	// 	&model.Patient{}, &model.DailyPatientMeal{})
-	// db.Gorm.Migrator().DropTable(&model.FoodMaterial{}, &model.Food{}, &model.FoodMaterialUsage{}, &model.MealMenu{})
-
+	// db.Gorm.Migrator().DropTable(&model.MealMenu{}, &model.MealMenuTemplate{})
 	db.Gorm.AutoMigrate(&model.User{},
-		&model.RoomType{}, &model.Room{},
-		&model.FoodMaterial{}, &model.MealType{},
-		&model.Food{}, &model.FoodMaterialUsage{}, &model.MealMenu{},
-		&model.Patient{}, &model.DailyPatientMeal{}, &model.DailyPatientMealLog{},
-		&model.Diet{}, &model.Allergy{})
+		&model.RoomType{},
+		&model.Room{},
+		&model.FoodMaterial{},
+		&model.MealType{},
+		&model.MealMenu{},
+		&model.MealMenuTemplate{},
+		&model.Food{},
+		&model.FoodMaterialUsage{},
+		&model.Patient{},
+		&model.DailyPatientMeal{},
+		&model.DailyPatientMealLog{},
+		&model.Diet{},
+		&model.Allergy{})
 
 	validator := validator.New()
 

@@ -69,11 +69,16 @@ func (s *Server) RegisterRoutes() http.Handler {
 		food.GET("/:id", s.foodHandler.GetByID)
 	}
 
-	mealMenu := api.Group("/meal-menu")
-	mealMenu.Use(s.RequireSession)
+	mealMenuTemplate := api.Group("/meal-menu-template")
+	mealMenuTemplate.Use(s.RequireSession)
 	{
-		mealMenu.GET("", s.mealMenuHandler.GetAll)
-		mealMenu.GET("/:id", s.mealMenuHandler.GetByID)
+		mealMenuTemplate.GET("", s.mealMenuHandler.GetAllMealMenuTemplate)
+		mealMenuTemplate.GET("/:template-id", s.mealMenuHandler.GetByIDMealMenuTemplate)
+		mealMenu := mealMenuTemplate.Group("/:template-id/meal-menu")
+		{
+			mealMenu.GET("", s.mealMenuHandler.GetAll)
+			mealMenu.GET("/:id", s.mealMenuHandler.GetByID)
+		}
 	}
 
 	patient := api.Group("/patient")
@@ -166,11 +171,18 @@ func (s *Server) RegisterRoutes() http.Handler {
 			food.DELETE("/:id", s.foodHandler.Delete)
 		}
 
-		mealMenu := admin.Group("/meal-menu")
+		mealMenuTemplate := admin.Group("/meal-menu-template")
 		{
-			mealMenu.POST("", s.mealMenuHandler.Create)
-			mealMenu.PATCH("/:id", s.mealMenuHandler.Update)
-			mealMenu.DELETE("/:id", s.mealMenuHandler.Delete)
+			mealMenuTemplate.POST("", s.mealMenuHandler.CreateMealMenuTemplate)
+			mealMenuTemplate.PATCH("/:template-id", s.mealMenuHandler.UpdateMealMenuTemplate)
+			mealMenuTemplate.DELETE("/:template-id", s.mealMenuHandler.DeleteMealMenuTemplate)
+
+			mealMenu := mealMenuTemplate.Group("/:template-id/meal-menu")
+			{
+				mealMenu.POST("", s.mealMenuHandler.Create)
+				mealMenu.PATCH("/:id", s.mealMenuHandler.Update)
+				mealMenu.DELETE("/:id", s.mealMenuHandler.Delete)
+			}
 		}
 
 		diet := admin.Group("/diet")

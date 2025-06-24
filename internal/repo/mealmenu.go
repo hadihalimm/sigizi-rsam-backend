@@ -11,6 +11,11 @@ type MealMenuRepo interface {
 	FindByID(id uint) (*model.MealMenu, error)
 	Update(menu *model.MealMenu) (*model.MealMenu, error)
 	Delete(id uint) error
+	CreateNewMealMenuTemplate(template *model.MealMenuTemplate) error
+	FindAllMealMenuTemplate() ([]model.MealMenuTemplate, error)
+	FindByIDMealMenuTemplate(id uint) (*model.MealMenuTemplate, error)
+	UpdateMealMenuTemplate(template *model.MealMenuTemplate) (*model.MealMenuTemplate, error)
+	DeleteMealMenuTemplate(id uint) error
 }
 
 type mealMenuRepo struct {
@@ -95,4 +100,60 @@ func (r *mealMenuRepo) Delete(id uint) error {
 	}
 	tx := r.db.Gorm.Delete(&model.MealMenu{}, id)
 	return tx.Error
+}
+
+func (r *mealMenuRepo) CreateNewMealMenuTemplate(template *model.MealMenuTemplate) error {
+	tx := r.db.Gorm.Create(&template)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
+func (r *mealMenuRepo) FindAllMealMenuTemplate() ([]model.MealMenuTemplate, error) {
+	var templates []model.MealMenuTemplate
+	tx := r.db.Gorm.Preload("MealMenus").Find(&templates)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return templates, nil
+}
+
+func (r *mealMenuRepo) FindByIDMealMenuTemplate(id uint) (*model.MealMenuTemplate, error) {
+	var template model.MealMenuTemplate
+	tx := r.db.Gorm.Preload("MealMenus").First(&template, id)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &template, nil
+}
+
+func (r *mealMenuRepo) UpdateMealMenuTemplate(template *model.MealMenuTemplate) (*model.MealMenuTemplate, error) {
+	tx := r.db.Gorm.Save(template)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	var updated *model.MealMenuTemplate
+	updated, err := r.FindByIDMealMenuTemplate(template.ID)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
+}
+
+func (r *mealMenuRepo) DeleteMealMenuTemplate(id uint) error {
+	template, err := r.FindByIDMealMenuTemplate(id)
+	if err != nil {
+		return err
+	}
+	err = r.db.Gorm.Model(&template).Association("MealMenus").Clear()
+	if err != nil {
+		return err
+	}
+
+	tx := r.db.Gorm.Delete(&model.MealMenuTemplate{}, id)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }
