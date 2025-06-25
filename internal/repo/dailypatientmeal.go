@@ -302,7 +302,7 @@ func (r *dailyPatientMealRepo) CountByDateForAllRoomTypes(
 
 type DailyMealTypeCount struct {
 	MealTypeID   uint   `json:"mealTypeID"`
-	MealTypeCode string `json:"mealTypeName"`
+	MealTypeCode string `json:"mealTypeCode"`
 	MealCount    uint   `json:"mealCount"`
 }
 
