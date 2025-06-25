@@ -181,6 +181,25 @@ func (h *DailyPatientMealHandler) CountByDateAndRoomType(c *gin.Context) {
 	})
 }
 
+func (h *DailyPatientMealHandler) CountForEveryMealType(c *gin.Context) {
+	dateString := c.Query("date")
+	date, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	count, err := h.dailyPatientMealService.CountForEveryMealType(date)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Count MealType for %s retrieved successfully", dateString),
+		"data":    count,
+	})
+}
+
 func (h *DailyPatientMealHandler) ExportToExcel(c *gin.Context) {
 	logger := config.WithRequestContext(config.Logger, c)
 

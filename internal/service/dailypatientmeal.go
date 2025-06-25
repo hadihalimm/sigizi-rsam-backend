@@ -24,6 +24,8 @@ type DailyPatientMealService interface {
 		date time.Time, roomTypeID uint) ([]model.DailyPatientMeal, error)
 	CountByDateAndRoomType(
 		date time.Time, roomTypeID uint) ([]repo.MealMatrixEntry, error)
+	CountForEveryMealType(
+		date time.Time) ([]repo.DailyMealTypeCount, error)
 	ExportToExcel(date time.Time) (*excelize.File, error)
 	FilterLogsByDate(date time.Time) ([]model.DailyPatientMealLog, error)
 	FilterLogsByDateAndRoomType(
@@ -150,6 +152,11 @@ func (s *dailyPatientMealService) CountByDateAndRoomType(
 		return nil, errors.New("room type not found")
 	}
 	return s.dailyPatientMealRepo.CountByDateAndRoomType(date, roomTypeID)
+}
+
+func (s *dailyPatientMealService) CountForEveryMealType(
+	date time.Time) ([]repo.DailyMealTypeCount, error) {
+	return s.dailyPatientMealRepo.CountForEveryMealType(date)
 }
 
 func (s *dailyPatientMealService) ExportToExcel(date time.Time) (*excelize.File, error) {
