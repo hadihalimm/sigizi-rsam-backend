@@ -68,6 +68,7 @@ func NewServer() *http.Server {
 		&model.MealType{},
 		&model.MealMenu{},
 		&model.MealMenuTemplate{},
+		&model.MenuTemplateSchedule{},
 		&model.Food{},
 		&model.FoodMaterialUsage{},
 		&model.Patient{},

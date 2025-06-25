@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
@@ -19,6 +21,12 @@ type MealMenuService interface {
 	UpdateMealMenuTemplate(
 		id uint, request request.UpdateMealMenuTemplate) (*model.MealMenuTemplate, error)
 	DeleteMealMenuTemplate(id uint) error
+	CreateMenuTemplateSchedule(request request.CreateMenuTemplateSchedule) (*model.MenuTemplateSchedule, error)
+	FindMenuTemplateScheduleByID(id uint) (*model.MenuTemplateSchedule, error)
+	FilterMenuTemplateScheduleByDate(
+		date time.Time) (*model.MenuTemplateSchedule, error)
+	UpdateMenuTemplateSchedule(
+		id uint, request request.UpdateMenuTemplateSchedule) (*model.MenuTemplateSchedule, error)
 }
 
 type mealMenuService struct {
@@ -124,4 +132,39 @@ func (s *mealMenuService) UpdateMealMenuTemplate(
 
 func (s *mealMenuService) DeleteMealMenuTemplate(id uint) error {
 	return s.mealMenuRepo.DeleteMealMenuTemplate(id)
+}
+
+func (s *mealMenuService) CreateMenuTemplateSchedule(
+	request request.CreateMenuTemplateSchedule) (*model.MenuTemplateSchedule, error) {
+	if err := s.validate.Struct(request); err != nil {
+		return nil, err
+	}
+
+	newSchedule := &model.MenuTemplateSchedule{
+		Date:               request.Date.Truncate(24 * time.Hour),
+		MealMenuTemplateID: request.MealMenuTemplateID,
+	}
+	return s.mealMenuRepo.CreateMenuTemplateSchedule(newSchedule)
+}
+
+func (s *mealMenuService) FindMenuTemplateScheduleByID(id uint) (*model.MenuTemplateSchedule, error) {
+	return s.mealMenuRepo.FindMenuTemplateScheduleByID(id)
+}
+
+func (s *mealMenuService) FilterMenuTemplateScheduleByDate(
+	date time.Time) (*model.MenuTemplateSchedule, error) {
+	return s.mealMenuRepo.FilterMenuTemplateScheduleByDate(date)
+}
+
+func (s *mealMenuService) UpdateMenuTemplateSchedule(
+	id uint, request request.UpdateMenuTemplateSchedule) (*model.MenuTemplateSchedule, error) {
+	if err := s.validate.Struct(request); err != nil {
+		return nil, err
+	}
+	schedule, err := s.mealMenuRepo.FindMenuTemplateScheduleByID(id)
+	if err != nil {
+		return nil, err
+	}
+	schedule.MealMenuTemplateID = request.MealMenuTemplateID
+	return s.mealMenuRepo.UpdateMenuTemplateSchedule(schedule)
 }

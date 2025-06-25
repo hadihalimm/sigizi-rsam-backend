@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hadihalimm/sigizi-rsam/internal/api/request"
@@ -183,5 +184,79 @@ func (h *MealMenuHandler) DeleteMealMenuTemplate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Meal menu template deleted successfully",
+	})
+}
+
+func (h *MealMenuHandler) CreateMenuTemplateSchedule(c *gin.Context) {
+	var request request.CreateMenuTemplateSchedule
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	schedule, err := h.mealMenuService.CreateMenuTemplateSchedule(request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Menu template schedule created successfully",
+		"data":    schedule,
+	})
+}
+
+func (h *MealMenuHandler) GetMenuTemplateScheduleByID(c *gin.Context) {
+	idUint64, _ := strconv.ParseUint(c.Param("schedule-id"), 10, 64)
+	id := uint(idUint64)
+
+	schedule, err := h.mealMenuService.FindMenuTemplateScheduleByID(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Menu template schedule retrieved successfully",
+		"data":    schedule,
+	})
+}
+
+func (h *MealMenuHandler) FilterMenuTemplateScheduleByDate(c *gin.Context) {
+	dateString := c.Query("date")
+	date, err := time.Parse("2006-01-02", dateString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	schedules, err := h.mealMenuService.FilterMenuTemplateScheduleByDate(date)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Menu template schedule filtered successfully",
+		"data":    schedules,
+	})
+}
+
+func (h *MealMenuHandler) UpdateMenuTemplateSchedule(c *gin.Context) {
+	var request request.UpdateMenuTemplateSchedule
+	if err := c.ShouldBindBodyWithJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	idUint64, _ := strconv.ParseUint(c.Param("schedule-id"), 10, 64)
+	id := uint(idUint64)
+
+	schedule, err := h.mealMenuService.UpdateMenuTemplateSchedule(id, request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Menu template schedule updated successfully",
+		"data":    schedule,
 	})
 }

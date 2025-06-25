@@ -81,6 +81,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 		}
 	}
 
+	menuTemplateSchedule := api.Group("/menu-template-schedule")
+	menuTemplateSchedule.Use(s.RequireSession)
+	{
+		menuTemplateSchedule.GET("/:schedule-id", s.mealMenuHandler.GetMenuTemplateScheduleByID)
+		menuTemplateSchedule.GET("", s.mealMenuHandler.FilterMenuTemplateScheduleByDate)
+	}
+
 	patient := api.Group("/patient")
 	patient.Use(s.RequireSession)
 	{
@@ -183,6 +190,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 				mealMenu.PATCH("/:id", s.mealMenuHandler.Update)
 				mealMenu.DELETE("/:id", s.mealMenuHandler.Delete)
 			}
+		}
+
+		menuTemplateSchedule := admin.Group("/menu-template-schedule")
+		{
+			menuTemplateSchedule.POST("", s.mealMenuHandler.CreateMenuTemplateSchedule)
+			menuTemplateSchedule.PATCH("/:schedule-id", s.mealMenuHandler.UpdateMenuTemplateSchedule)
 		}
 
 		diet := admin.Group("/diet")

@@ -1,5 +1,7 @@
 package request
 
+import "time"
+
 type CreateMealMenu struct {
 	Name               string `json:"name" binding:"required" validate:"required"`
 	Day                uint   `json:"day" binding:"required" validate:"required"`
@@ -24,4 +26,13 @@ type CreateMealMenuTemplate struct {
 
 type UpdateMealMenuTemplate struct {
 	Name string `json:"name" binding:"required" validate:"required"`
+}
+
+type CreateMenuTemplateSchedule struct {
+	Date               time.Time `json:"date" binding:"required" validate:"required"`
+	MealMenuTemplateID uint      `json:"mealMenuTemplateID" binding:"required" validate:"required"`
+}
+
+type UpdateMenuTemplateSchedule struct {
+	MealMenuTemplateID uint `json:"mealMenuTemplateID" binding:"required" validate:"required"`
 }

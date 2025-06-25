@@ -22,3 +22,10 @@ type MealMenuTemplate struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	UpdatedAt time.Time  `json:"updatedAt"`
 }
+
+type MenuTemplateSchedule struct {
+	ID                 uint      `gorm:"primaryKey" json:"id"`
+	Date               time.Time `gorm:"uniqueIndex:idx_template_date" json:"date"`
+	MealMenuTemplateID uint      `gorm:"uniqueIndex:idx_template_date" json:"mealMenuTemplateID"`
+	MealMenuTemplate   MealMenuTemplate
+}

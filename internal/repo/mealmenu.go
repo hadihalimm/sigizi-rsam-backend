@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"time"
+
 	"github.com/hadihalimm/sigizi-rsam/internal/config"
 	"github.com/hadihalimm/sigizi-rsam/internal/model"
 )
@@ -16,6 +18,12 @@ type MealMenuRepo interface {
 	FindByIDMealMenuTemplate(id uint) (*model.MealMenuTemplate, error)
 	UpdateMealMenuTemplate(template *model.MealMenuTemplate) (*model.MealMenuTemplate, error)
 	DeleteMealMenuTemplate(id uint) error
+	CreateMenuTemplateSchedule(schedule *model.MenuTemplateSchedule) (*model.MenuTemplateSchedule, error)
+	FindMenuTemplateScheduleByID(id uint) (*model.MenuTemplateSchedule, error)
+	FilterMenuTemplateScheduleByDate(
+		date time.Time) (*model.MenuTemplateSchedule, error)
+	UpdateMenuTemplateSchedule(
+		schedule *model.MenuTemplateSchedule) (*model.MenuTemplateSchedule, error)
 }
 
 type mealMenuRepo struct {
@@ -112,7 +120,7 @@ func (r *mealMenuRepo) CreateNewMealMenuTemplate(template *model.MealMenuTemplat
 
 func (r *mealMenuRepo) FindAllMealMenuTemplate() ([]model.MealMenuTemplate, error) {
 	var templates []model.MealMenuTemplate
-	tx := r.db.Gorm.Preload("MealMenus").Find(&templates)
+	tx := r.db.Gorm.Find(&templates)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -121,7 +129,10 @@ func (r *mealMenuRepo) FindAllMealMenuTemplate() ([]model.MealMenuTemplate, erro
 
 func (r *mealMenuRepo) FindByIDMealMenuTemplate(id uint) (*model.MealMenuTemplate, error) {
 	var template model.MealMenuTemplate
-	tx := r.db.Gorm.Preload("MealMenus").First(&template, id)
+	tx := r.db.Gorm.Preload("MealMenus").
+		Preload("MealMenus.Foods").
+		Preload("MealMenus.MealType").
+		First(&template, id)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -156,4 +167,59 @@ func (r *mealMenuRepo) DeleteMealMenuTemplate(id uint) error {
 		return tx.Error
 	}
 	return nil
+}
+
+func (r *mealMenuRepo) CreateMenuTemplateSchedule(
+	schedule *model.MenuTemplateSchedule) (*model.MenuTemplateSchedule, error) {
+	tx := r.db.Gorm.Create(&schedule)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return schedule, nil
+}
+
+func (r *mealMenuRepo) FindMenuTemplateScheduleByID(id uint) (*model.MenuTemplateSchedule, error) {
+	var schedule model.MenuTemplateSchedule
+	tx := r.db.Gorm.Preload("MealMenuTemplate").
+		Preload("MealMenuTemplate.MealMenus").
+		Preload("MealMenuTemplate.MealMenus.Foods").
+		Preload("MealMenuTemplate.MealMenus.Foods.FoodMaterialUsages").
+		Preload("MealMenuTemplate.MealMenus.Foods.FoodMaterialUsages.FoodMaterial").
+		Preload("MealMenuTemplate.MealMenus.MealType").
+		First(&schedule, id)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &schedule, nil
+}
+
+func (r *mealMenuRepo) FilterMenuTemplateScheduleByDate(
+	date time.Time) (*model.MenuTemplateSchedule, error) {
+	var schedule model.MenuTemplateSchedule
+	tx := r.db.Gorm.Preload("MealMenuTemplate").
+		Preload("MealMenuTemplate.MealMenus").
+		Preload("MealMenuTemplate.MealMenus.Foods").
+		Preload("MealMenuTemplate.MealMenus.Foods.FoodMaterialUsages").
+		Preload("MealMenuTemplate.MealMenus.Foods.FoodMaterialUsages.FoodMaterial").
+		Preload("MealMenuTemplate.MealMenus.MealType").
+		Where("DATE(menu_template_schedules.date) = ?", date.Format("2006-01-02")).
+		First(&schedule)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &schedule, nil
+}
+
+func (r *mealMenuRepo) UpdateMenuTemplateSchedule(
+	schedule *model.MenuTemplateSchedule) (*model.MenuTemplateSchedule, error) {
+	tx := r.db.Gorm.Save(schedule)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	var updated *model.MenuTemplateSchedule
+	updated, err := r.FindMenuTemplateScheduleByID(schedule.ID)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
 }
