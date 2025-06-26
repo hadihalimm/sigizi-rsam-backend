@@ -318,6 +318,9 @@ func (r *dailyPatientMealRepo) CountForEveryMealType(date time.Time) ([]DailyMea
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+	if results == nil {
+		return []DailyMealTypeCount{}, nil
+	}
 	return results, nil
 }
 
