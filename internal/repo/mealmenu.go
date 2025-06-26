@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/hadihalimm/sigizi-rsam/internal/config"
@@ -212,12 +213,17 @@ func (r *mealMenuRepo) FilterMenuTemplateScheduleByDate(
 
 func (r *mealMenuRepo) UpdateMenuTemplateSchedule(
 	schedule *model.MenuTemplateSchedule) (*model.MenuTemplateSchedule, error) {
-	tx := r.db.Gorm.Save(schedule)
+	tx := r.db.Gorm.Model(&model.MenuTemplateSchedule{}).
+		Where("id = ?", schedule.ID).
+		Updates(map[string]interface{}{
+			"meal_menu_template_id": schedule.MealMenuTemplateID,
+		})
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	var updated *model.MenuTemplateSchedule
 	updated, err := r.FindMenuTemplateScheduleByID(schedule.ID)
+	fmt.Println(updated.MealMenuTemplateID)
 	if err != nil {
 		return nil, err
 	}
