@@ -55,6 +55,7 @@ func (s *mealMenuService) Create(request request.CreateMealMenu) (*model.MealMen
 		Name:               request.Name,
 		Day:                request.Day,
 		Time:               request.Time,
+		MenuType:           request.MenuType,
 		MealTypeID:         request.MealTypeID,
 		Foods:              foods,
 		MealMenuTemplateID: request.MealMenuTemplateID,
@@ -88,6 +89,7 @@ func (s *mealMenuService) Update(id uint, request request.UpdateMealMenu) (*mode
 	menu.Name = request.Name
 	menu.Day = request.Day
 	menu.Time = request.Time
+	menu.MenuType = request.MenuType
 	menu.MealTypeID = request.MealTypeID
 	menu.Foods = foods
 

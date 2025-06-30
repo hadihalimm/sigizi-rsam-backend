@@ -6,6 +6,7 @@ type CreateMealMenu struct {
 	Name               string `json:"name" binding:"required" validate:"required"`
 	Day                uint   `json:"day" binding:"required" validate:"required"`
 	Time               string `json:"time" binding:"required" validate:"required,oneof=pagi siang sore"`
+	MenuType           string `json:"menu_type" binding:"required" validate:"required,oneof=biasa vvip"`
 	MealTypeID         uint   `json:"mealTypeID" binding:"required" validate:"required"`
 	MealMenuTemplateID uint   `json:"mealMenuTemplateID" binding:"required" validate:"required"`
 	FoodIDs            []uint `json:"foodIDs" validate:"required,min=1,dive,gt=0"`
@@ -15,6 +16,7 @@ type UpdateMealMenu struct {
 	Name               string `json:"name" binding:"required" validate:"required"`
 	Day                uint   `json:"day" binding:"required" validate:"required"`
 	Time               string `json:"time" binding:"required" validate:"required,oneof=pagi siang sore"`
+	MenuType           string `json:"menu_type" binding:"required" validate:"required,oneof=biasa vvip"`
 	MealTypeID         uint   `json:"mealTypeID" binding:"required" validate:"required"`
 	MealMenuTemplateID uint   `json:"mealMenuTemplateID" binding:"required" validate:"required"`
 	FoodIDs            []uint `json:"foodIDs" validate:"required,min=1,dive,gt=0"`

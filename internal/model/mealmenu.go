@@ -7,6 +7,7 @@ type MealMenu struct {
 	Name               string    `gorm:"not null;" json:"name"`
 	Day                uint      `gorm:"not null;" json:"day"`
 	Time               string    `gorm:"not null;" json:"time"`
+	MenuType           string    `gorm:"not null;" json:"menu_type"`
 	MealTypeID         uint      `gorm:"not null;" json:"mealTypeID"`
 	Foods              []Food    `gorm:"many2many:meal_foods;" json:"foods"`
 	MealType           MealType  `json:"mealType"`
