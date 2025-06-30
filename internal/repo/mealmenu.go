@@ -14,11 +14,13 @@ type MealMenuRepo interface {
 	FindByID(id uint) (*model.MealMenu, error)
 	Update(menu *model.MealMenu) (*model.MealMenu, error)
 	Delete(id uint) error
+
 	CreateNewMealMenuTemplate(template *model.MealMenuTemplate) error
 	FindAllMealMenuTemplate() ([]model.MealMenuTemplate, error)
 	FindByIDMealMenuTemplate(id uint) (*model.MealMenuTemplate, error)
 	UpdateMealMenuTemplate(template *model.MealMenuTemplate) (*model.MealMenuTemplate, error)
 	DeleteMealMenuTemplate(id uint) error
+
 	CreateMenuTemplateSchedule(schedule *model.MenuTemplateSchedule) (*model.MenuTemplateSchedule, error)
 	FindMenuTemplateScheduleByID(id uint) (*model.MenuTemplateSchedule, error)
 	FilterMenuTemplateScheduleByDate(
