@@ -4,10 +4,10 @@ import "time"
 
 type DailyPatientMeal struct {
 	ID              uint      `gorm:"primaryKey" json:"id"`
-	PatientID       uint      `gorm:"not null;index;uniqueIndex:idx_patient_date" json:"patientID"`
-	RoomID          uint      `gorm:"not null;index" json:"roomID"`
-	MealTypeID      uint      `gorm:"not null;index" json:"mealTypeID"`
-	Date            time.Time `gorm:"not null;index;uniqueIndex:idx_patient_date" json:"date"`
+	PatientID       uint      `gorm:"not null;uniqueIndex:idx_patient_date" json:"patientID"`
+	RoomID          uint      `gorm:"not null" json:"roomID"`
+	MealTypeID      uint      `gorm:"not null" json:"mealTypeID"`
+	Date            time.Time `gorm:"not null;uniqueIndex:idx_patient_date" json:"date"`
 	Notes           string    `json:"notes"`
 	CreatedAt       time.Time `json:"createdAt"`
 	UpdatedAt       time.Time `json:"updatedAt"`
@@ -29,5 +29,5 @@ type DailyPatientMealLog struct {
 	OldValue           string    `gorm:"type:text" json:"oldValue"`
 	NewValue           string    `gorm:"type:text" json:"newValue"`
 	ChangedAt          time.Time `gorm:"not null" json:"changedAt"`
-	Date               time.Time `gorm:"not null;index" json:"date"`
+	Date               time.Time `gorm:"not null" json:"date"`
 }
