@@ -69,6 +69,18 @@ func (s *Server) RegisterRoutes() http.Handler {
 		food.GET("/:id", s.foodHandler.GetByID)
 	}
 
+	snack := api.Group("snack")
+	snack.Use(s.RequireSession)
+	{
+		snack.GET("", s.snackHandler.GetAll)
+		snack.GET("/:snack-id", s.snackHandler.GetByID)
+		snackVariant := snack.Group("/:snack-id/variant")
+		{
+			snackVariant.GET("", s.snackHandler.GetAllVariant)
+			snackVariant.GET("/:variant-id", s.snackHandler.GetVariantByID)
+		}
+	}
+
 	mealMenuTemplate := api.Group("/meal-menu-template")
 	mealMenuTemplate.Use(s.RequireSession)
 	{
@@ -177,6 +189,20 @@ func (s *Server) RegisterRoutes() http.Handler {
 			food.POST("", s.foodHandler.Create)
 			food.PATCH("/:id", s.foodHandler.Update)
 			food.DELETE("/:id", s.foodHandler.Delete)
+		}
+
+		snack := admin.Group("/snack")
+		{
+			snack.POST("", s.snackHandler.Create)
+			snack.PATCH("/:snack-id", s.snackHandler.Update)
+			snack.DELETE("/:snack-id", s.snackHandler.Delete)
+
+			snackVariant := snack.Group("/:snack-id/variant")
+			{
+				snackVariant.POST("", s.snackHandler.CreateVariant)
+				snackVariant.PATCH("/:variant-id", s.snackHandler.UpdateVariant)
+				snackVariant.DELETE("/:variant-id", s.snackHandler.DeleteVariant)
+			}
 		}
 
 		mealMenuTemplate := admin.Group("/meal-menu-template")

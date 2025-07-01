@@ -28,6 +28,7 @@ type Server struct {
 	foodMaterialHandler     *handler.FoodMaterialHandler
 	mealTypeHandler         *handler.MealTypeHandler
 	foodHandler             *handler.FoodHandler
+	snackHandler            *handler.SnackHandler
 	mealMenuHandler         *handler.MealMenuHandler
 	patientHandler          *handler.PatientHandler
 	dailyPatientMealHandler *handler.DailyPatientMealHandler
@@ -47,7 +48,7 @@ func NewServer() *http.Server {
 	envFile := ".env." + env
 	err = godotenv.Load(envFile)
 	if err != nil {
-		log.Print("No %s file found", envFile)
+		log.Printf("No %s file found", envFile)
 	}
 
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
@@ -60,7 +61,7 @@ func NewServer() *http.Server {
 	// 	&model.RoomType{}, &model.Room{},
 	// 	&model.Food{}, &model.MealType{}, &model.MealItem{},
 	// 	&model.Patient{}, &model.DailyPatientMeal{})
-	// db.Gorm.Migrator().DropTable(&model.MealMenu{}, &model.MealMenuTemplate{})
+	// db.Gorm.Migrator().DropTable(&model.SnackVariant{}, &model.SnackVariantMaterialUsage{})
 	db.Gorm.AutoMigrate(&model.User{},
 		&model.RoomType{},
 		&model.Room{},
@@ -70,6 +71,9 @@ func NewServer() *http.Server {
 		&model.MealMenuTemplate{},
 		&model.MenuTemplateSchedule{},
 		&model.Food{},
+		&model.Snack{},
+		&model.SnackVariant{},
+		&model.SnackVariantMaterialUsage{},
 		&model.FoodMaterialUsage{},
 		&model.Patient{},
 		&model.DailyPatientMeal{},
@@ -105,6 +109,10 @@ func NewServer() *http.Server {
 	foodService := service.NewFoodService(foodRepo, validator)
 	foodHandler := handler.NewFoodHandler(foodService)
 
+	snackRepo := repo.NewSnackRepo(db)
+	snackService := service.NewSnackService(snackRepo, validator)
+	snackHandler := handler.NewSnackHandler(snackService)
+
 	mealMenuRepo := repo.NewMealMenuRepo(db)
 	mealMenuService := service.NewMealMenuService(mealMenuRepo, foodRepo, validator)
 	mealMenuHandler := handler.NewMealMenuHandler(mealMenuService)
@@ -135,6 +143,7 @@ func NewServer() *http.Server {
 		foodMaterialHandler:     foodMaterialHandler,
 		mealTypeHandler:         mealTypeHandler,
 		foodHandler:             foodHandler,
+		snackHandler:            snackHandler,
 		mealMenuHandler:         mealMenuHandler,
 		patientHandler:          patientHandler,
 		dailyPatientMealHandler: dailyPatientMealHandler,
