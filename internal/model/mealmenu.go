@@ -10,8 +10,10 @@ type MealMenu struct {
 	MenuType           string    `gorm:"not null;" json:"menu_type"`
 	MealTypeID         uint      `gorm:"not null;" json:"mealTypeID"`
 	Foods              []Food    `gorm:"many2many:meal_foods;" json:"foods"`
-	MealType           MealType  `json:"mealType"`
+	SnackID            *uint     `gorm:"" json:"snackID"`
+	Snack              *Snack    `gorm:"" json:"snack"`
 	MealMenuTemplateID uint      `gorm:"not null;" json:"mealMenuTemplateID"`
+	MealType           MealType  `json:"mealType"`
 	CreatedAt          time.Time `json:"createdAt"`
 	UpdatedAt          time.Time `json:"updatedAt"`
 }
