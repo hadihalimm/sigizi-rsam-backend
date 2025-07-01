@@ -34,6 +34,7 @@ func (s *foodMaterialService) Create(request request.CreateFoodMaterial) (*model
 	newFoodMaterial := &model.FoodMaterial{
 		Name:            request.Name,
 		Unit:            request.Unit,
+		Category:        request.Category,
 		StandardPerMeal: request.StandardPerMeal,
 	}
 	return s.foodMaterialRepo.Create(newFoodMaterial)
@@ -58,6 +59,7 @@ func (s *foodMaterialService) Update(id uint, request request.UpdateFoodMaterial
 
 	foodMaterial.Name = request.Name
 	foodMaterial.Unit = request.Unit
+	foodMaterial.Category = request.Category
 	foodMaterial.StandardPerMeal = request.StandardPerMeal
 	return s.foodMaterialRepo.Update(foodMaterial)
 }
